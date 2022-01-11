@@ -1,0 +1,11 @@
+#! /bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Uncomment and change the next line to customize your java 11 path
+#export JAVA_HOME=/your/java/path
+
+"$DIR/gradlew" build
+
+if [ $? -ne 0 ]; then exit ; fi
+

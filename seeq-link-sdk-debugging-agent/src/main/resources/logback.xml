@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scanPeriod="10 seconds" scan="true">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <target>System.out</target>
+        <encoder>
+            <pattern>%-5level %d{"yyyy-MM-dd'T'HH:mm:ss.SSSXXX"} [%thread] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>build/log/jvm-debugging-agent.log</file>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>80MB</maxFileSize>
+        </triggeringPolicy>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>build/log/jvm-debugging-agent.%i.log.zip</fileNamePattern>
+            <maxIndex>4</maxIndex>
+        </rollingPolicy>
+        <encoder>
+            <!-- The replace avoids a serious slowdown on Windows. See CRAB-7651 for more details -->
+            <pattern>%-5level %d{"yyyy-MM-dd'T'HH:mm:ss.SSSXXX"} [%thread] %logger - %replace(%msg){'(\r?\n\s*)//', '$1##'}%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Print only messages of level debug or above in the package com.seeq -->
+    <logger name="com.seeq" level="DEBUG"/>
+
+    <root level="WARN">
+        <appender-ref ref="rollingFile"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
