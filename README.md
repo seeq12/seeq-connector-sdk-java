@@ -17,13 +17,13 @@ If you need a license file for this purpose, contact [support@seeq.com](mailto:s
 Environment Setup
 =================
 
-# The Build Environment
+## The Build Environment
 
 The Java version of the SDK is located in the `java` directory and is built with Gradle. We recommend that you
 familiarize yourself with the [basics of Gradle](https://docs.gradle.org/current/userguide
 /tutorial_using_tasks.html) before proceeding.
 
-# Verifying your Environment
+## Verifying your Environment
 
 Before doing anything else, we recommend that you build the connector template and ensure that it is fully working with
 your private system.
@@ -86,7 +86,7 @@ Take the following steps to verify your debugging setup:
 
 Now you're ready to start development!
 
-# Developing your Connector
+## Developing your Connector
 
 You will probably want to adjust the name and group of your connector. You can do so by using rename refactorings on the
 classes and folders in your IDE. You'll also have to adjust ALL the `settings.gradle.kts` and `build.gradle.kts`
@@ -107,7 +107,7 @@ the project and still build without errors.
 Any log messages you create using the `log()` method on `ConnectorServiceV2` and `DatasourceConnectionServiceV2` will go
 to the debug console and to the `java/seeq-link-sdk-debugging-agent/build/log/jvm-debugging-agent.log` file.
 
-# Deploying your Connector
+## Deploying your Connector
 
 When you are ready to deploy your connector to a production environment, execute the `build` command. A zip file will be
 created in the `build/distributions` folder of your connector.
