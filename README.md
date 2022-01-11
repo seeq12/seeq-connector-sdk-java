@@ -31,7 +31,7 @@ familiarize yourself with the [basics of Gradle](https://docs.gradle.org/current
 Before doing anything else, we recommend that you build the connector template and ensure that it is fully working with
 your private system.
 
-From the `java` directory, execute the `build` command. This command will download dependencies from the web, so make
+From the root directory, execute the `build` command. This command will download dependencies from the web, so make
 sure you have a good internet connection. If it fails for some (non-obvious) reason, email the output (including the
 error message) to [support@seeq.com](mailto:support@seeq.com).
 
@@ -60,7 +60,7 @@ correctly.
 
 If you encounter Gradle build errors, verify that Gradle is using the correct JVM. In your IntelliJ Settings, go to
 *Build, Execution, Deployment > Build Tools > Gradle* and select *Add JDK* in the dropdown menu for *Gradle JVM*. In the
-popup for setting the JDK home directory, select the `java/jdk/files` directory.
+popup for setting the JDK home directory, select the `java` directory you just installed.
 
 Take the following steps to verify your debugging setup:
 
