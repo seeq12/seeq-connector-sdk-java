@@ -19,7 +19,10 @@ Environment Setup
 
 ## The Build Environment
 
-The Java version of the SDK is located in the `java` directory and is built with Gradle. We recommend that you
+Before proceeding we recommend you to install java 11 from 
+https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/downloads-list.html and change your build/build.bat 
+scripts to set the JAVA_HOME variable to the location where your java is installed. 
+The Java version of the SDK is built with Gradle. We recommend that you
 familiarize yourself with the [basics of Gradle](https://docs.gradle.org/current/userguide
 /tutorial_using_tasks.html) before proceeding.
 
