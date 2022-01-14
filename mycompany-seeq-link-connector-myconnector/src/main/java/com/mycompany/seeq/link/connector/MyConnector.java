@@ -50,9 +50,6 @@ public class MyConnector implements ConnectorV2 {
 
             // Add the new connection configuration to its parent connector
             this.connectorConfig.getConnections().add(connectionConfig);
-
-            // Save the new (default) configuration file so that the user can see it and modify it themselves
-            this.connectorService.saveConfig(this.connectorConfig);
         }
 
         // Now instantiate your connections based on the configuration.
@@ -62,11 +59,13 @@ public class MyConnector implements ConnectorV2 {
                 // If the ID is null, then the user likely copy/pasted an existing connection configuration and
                 // removed the ID so that a new one would be generated. Generate the new one!
                 connectionConfig.setId(UUID.randomUUID().toString());
-                this.connectorService.saveConfig(this.connectorConfig);
             }
 
             this.connectorService.addConnection(new MyConnection(this, connectionConfig));
         }
+
+        // Finally, save the connector configuration in a file for the user to view and modify as needed
+        this.connectorService.saveConfig(this.connectorConfig);
     }
 
     @Override
