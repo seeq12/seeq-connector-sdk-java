@@ -192,7 +192,7 @@ public class MongoDbConnection implements ConditionPullDatasourceConnection {
         severity.setUnitOfMeasure("");
         CapsulePropertyInputV1 message = new CapsulePropertyInputV1();
         message.setName("Message");
-        message.setUnitOfMeasure("");
+        message.setUnitOfMeasure("string");
         sourceCondition.addCapsulePropertiesItem(severity);
         sourceCondition.addCapsulePropertiesItem(message);
         return sourceCondition;
@@ -247,12 +247,12 @@ public class MongoDbConnection implements ConditionPullDatasourceConnection {
         var result = getCapsulesInternal(endTime, startTime, parent);
         List<Capsule> foundCapsules = new ArrayList<>();
         result.forEach((Consumer<Document>) doc -> {
-            long capsuleTime = (long)doc.get(connectionConfig)*1000;
+            long capsuleTime = (long)doc.get(connectionConfig.getTimestampField())*1000;
             TimeInstant capsuleStart = new TimeInstant(capsuleTime);
             TimeInstant capsuleEnd = new TimeInstant(capsuleTime+this.conditionDuration);
             List<Capsule.Property> properties = new ArrayList<>();
             properties.add(new Capsule.Property("Severity", doc.get("severity").toString(), ""));
-            properties.add(new Capsule.Property("Message", doc.get("message").toString(), ""));
+            properties.add(new Capsule.Property("Message", doc.get("message").toString(), "string"));
             Capsule capsule = new Capsule(capsuleStart, capsuleEnd, properties);
             foundCapsules.add(capsule);
         });
