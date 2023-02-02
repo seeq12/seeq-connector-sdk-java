@@ -1,4 +1,4 @@
-package com.mycompany.seeq.link.connector;
+package com.seeq.link.connector.flexgen;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
