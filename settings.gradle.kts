@@ -1,4 +1,4 @@
-rootProject.name = "seeq-link-connector-flexgen-mongodb"
+rootProject.name = "seeq-connector-sdk"
 
-include("seeq-link-connector-flexgen-mongodb")
+include("mycompany-seeq-link-connector-myconnector")
 include("seeq-link-sdk-debugging-agent")
