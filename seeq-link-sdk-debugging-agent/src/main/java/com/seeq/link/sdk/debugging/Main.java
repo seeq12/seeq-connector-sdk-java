@@ -1,9 +1,6 @@
 package com.seeq.link.sdk.debugging;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -25,21 +22,17 @@ public class Main {
         // Provide a name for the agent that differentiates it from the "normal" JVM Agent
         config.setName("Java Connector SDK Debugging Agent");
 
-        // This configures the agent to run as a remote rather than local agent (seeq on a different machine)
-        config.setRemoteAgent(true);
-
-        try {
-            config.setSeeqUrl(new URL("https://develop.seeq.dev"));
-            config.setSeeqWebSocketUrl(new URL("https://develop.seeq.dev"));
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+        // Specify the data folder; change this if you've configured Seeq to use a different location!
+        Path dataFolder;
+        if (OperatingSystem.isWindows()) {
+            dataFolder = Paths.get(System.getenv("ProgramData"), "Seeq", "data");
+        } else {
+            dataFolder = Paths.get(System.getProperty("user.home"), ".seeq", "data");
         }
-
-        // Ensure you set the agent api key in /main/resources/data/keys
-        Path dataFolder = getSeeqDataFolder();
         config.setDataFolder(dataFolder);
 
         // Set the connectorSearchPaths to only find connectors within the connector-sdk folder
+
         Path executingAssemblyLocation;
         try {
             // Grab the full path of the Agent JAR that is currently executing
@@ -55,12 +48,6 @@ public class Main {
         config.setConnectorSearchPaths(searchPath);
 
         new Program().run(new com.seeq.link.agent.ClassFactory(), new ClassFactory(), config);
-    }
-
-    private static Path getSeeqDataFolder(){
-        String path = "src/main/resources/data";
-        File file = new File(path);
-        return Path.of(file.getAbsolutePath());
     }
 
 }
