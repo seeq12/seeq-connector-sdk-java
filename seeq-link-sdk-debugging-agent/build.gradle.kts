@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.seeq.link:seeq-link-agent:58.0.1-v202209221348")
+    implementation("com.seeq.link:seeq-link-agent:58.3.0-v202301180600")
 }
 
 application {
