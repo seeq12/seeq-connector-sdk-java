@@ -65,26 +65,26 @@ popup for setting the JDK home directory, select the `java` directory you just i
 Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
-2. If you have configured Seeq to use a different location for the data folder than the default, update the snippet
-   starting on line 26 with the proper path. **This step is required to ensure that your agent can find the SSL keys to
-   communicate with Seeq Server.**
-3. Set a breakpoint on the first line of the `main()` function.
-4. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
+1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
+1. Modify the `agent_api_key` in `resources\data\keys\agent.key` my replacing the `<your_agent_api_key>`
+   with the key that is located in the top right of your Seeq Administration page
+1. Set a breakpoint on the first line of the `main()` function.
+1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
    right-click on
    *seeq-connector-sdk > seeq-link-sdk-debugging-agent > Tasks > application > run* and select *Debug*.
-5. You should hit the breakpoint you set. **This verifies that your IDE built your project correctly and can connect its
+1. You should hit the breakpoint you set. **This verifies that your IDE built your project correctly and can connect its
    debugger to it.**
-6. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java
+1. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java
    ` file in the
    `mycompany-seeq-link-connector-myconnector` and put a breakpoint on the first line of the `initialize()` function.
-7. Resume execution (*Run > Debugging Actions > Resume Program*). You should hit the next breakpoint. **This verifies
+1. Resume execution (*Run > Debugging Actions > Resume Program*). You should hit the next breakpoint. **This verifies
    that the debugging agent can load the template connector correctly.**
-8. Resume execution.
-9. Bring up Seeq Workbench and click on the connections section at the top of the screen. You should
+1. Resume execution.
+1. Bring up Seeq Workbench and click on the connections section at the top of the screen. You should
    see `My Connector Type: My First Connection` in the list of connections, with 5000 items indexed.
-10. In Seeq Workbench's *Data* tab, search for `simulated`.
-11. A list of simulated signals should appear in the results. Click on any of the results.
-12. The signal should be added to the *Details* pane and a repeating waveform should be shown in the trend. **This
+1. In Seeq Workbench's *Data* tab, search for `simulated`.
+1. A list of simulated signals should appear in the results. Click on any of the results.
+1. The signal should be added to the *Details* pane and a repeating waveform should be shown in the trend. **This
     verifies that the template connector is able to index its signals and respond to data queries.**
 
 Now you're ready to start development!

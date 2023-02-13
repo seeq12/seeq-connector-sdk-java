@@ -1,0 +1,24 @@
+{
+  "Version" : "com.seeq.link.agent.config.AgentConfigV1",
+  "Connectors" : [ {
+    "Name" : "MyCompany MyConnector",
+    "Enabled" : true
+  } ],
+  "WatchdogOverride" : {
+    "WatchdogEnabled" : null,
+    "SeeqServerHttpConnection" : null,
+    "SeeqServerWebSocketConnection" : null,
+    "SeeqServerResponse" : null,
+    "AgentHeartbeat" : null,
+    "HighMemoryUse" : null,
+    "ConnectorConfigChange" : null
+  },
+  "ConcurrentMetadataSync" : true,
+  "RemoteLogStreaming" : true,
+  "IsolateDependencies" : true,
+  "SeeqServerConnectTimeoutForIndexing" : null,
+  "SeeqServerReadTimeoutForIndexing" : null,
+  "SeeqServerNetworkTimeoutForIndexing" : null,
+  "ExportMaxConcurrencyLevel" : null,
+  "HighMemoryUseThresholdGB" : null
+}

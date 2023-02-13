@@ -1,0 +1,18 @@
+{
+  "Version" : "com.mycompany.seeq.link.connector.MyConnectorConfigV1",
+  "Connections" : [ {
+    "Name" : "My First Connection",
+    "Id" : "d61fae22-c8b5-4c35-855b-377c229897ca",
+    "Enabled" : true,
+    "Indexing" : {
+      "Frequency" : "1w",
+      "OnStartupAndConfigChange" : true,
+      "Next" : "2023-02-13T10:56:38.988181700-07:00[America/Denver]"
+    },
+    "Transforms" : null,
+    "MaxConcurrentRequests" : null,
+    "MaxResultsPerRequest" : null,
+    "TagCount" : 5000,
+    "SamplePeriod" : "15m"
+  } ]
+}
