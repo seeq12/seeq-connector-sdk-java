@@ -2,7 +2,11 @@ package com.mycompany.seeq.link.connector;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
+import java.util.Random;
+
+import com.seeq.link.sdk.utilities.TimeInstant;
 
 public class DatasourceSimulator {
     private boolean connected;
@@ -114,5 +118,36 @@ public class DatasourceSimulator {
         }
 
         return value;
+    }
+
+    public TagValue requestLastTagValue(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp) {
+        return this.query(dataId, startTimestamp, endTimestamp, 1).next();
+    }
+
+    public Iterator<TagValue> query(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
+        // for consistent, reproducible behaviour
+        final int seed = 1_000_000;
+        Random random = new Random(seed);
+        ZonedDateTime startTime = startTimestamp.toDateTime();
+        ZonedDateTime endTime = endTimestamp.toDateTime();
+        long timespanInMs = (Duration.between(startTime, endTime)).toMillis();
+        long timestampIncrement = timespanInMs / limit;
+
+        return new Iterator<TagValue>() {
+            private int index = 1;
+
+            @Override
+            public boolean hasNext() {
+                return this.index <= limit;
+            }
+
+            @Override
+            public TagValue next() {
+                ZonedDateTime start = startTime.plus(timestampIncrement * this.index, ChronoUnit.MILLIS);
+                ZonedDateTime end = start.plus(10, ChronoUnit.MILLIS);
+                this.index++;
+                return new TagValue(start, end, random.nextDouble());
+            }
+        };
     }
 }
