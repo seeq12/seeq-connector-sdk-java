@@ -1,6 +1,7 @@
 package com.mycompany.seeq.link.connector;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Iterator;
 
 public class DatasourceSimulator {
@@ -29,6 +30,30 @@ public class DatasourceSimulator {
 
         public boolean getStepped() {
             return this.stepped;
+        }
+    }
+
+    public class TagValue {
+        private final ZonedDateTime start;
+        private final ZonedDateTime end;
+        private final double value;
+
+        public TagValue(ZonedDateTime start, ZonedDateTime end, double value) {
+            this.start = start;
+            this.end = end;
+            this.value = value;
+        }
+
+        public ZonedDateTime getStart() {
+            return start;
+        }
+
+        public ZonedDateTime getEnd() {
+            return end;
+        }
+
+        public double getValue() {
+            return value;
         }
     }
 
