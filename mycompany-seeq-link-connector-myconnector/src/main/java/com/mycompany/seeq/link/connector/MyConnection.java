@@ -2,7 +2,10 @@ package com.mycompany.seeq.link.connector;
 
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -255,6 +258,60 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
     }
 
     @Override
+    public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
+        if (parameters.isLastCertainKeyRequested()) {
+            TimeInstant endTime = new TimeInstant(ZonedDateTime.now());
+            TimeInstant startTime = new TimeInstant(endTime.getTimestamp() - parameters.getMaxDuration());
+            DatasourceSimulator.TagValue lastTagValue = this.datasourceSimulator.requestLastTagValue(
+                    parameters.getDataId(),
+                    startTime,
+                    endTime
+            );
+
+            if (lastTagValue != null) {
+                parameters.setLastCertainKey(new TimeInstant(lastTagValue.getEnd()));
+            }
+        }
+
+        try {
+            Iterator<DatasourceSimulator.TagValue> tagValues = this.datasourceSimulator.query(
+                    parameters.getDataId(),
+                    parameters.getStartTime(),
+                    parameters.getEndTime(),
+                    parameters.getCapsuleLimit()
+            );
+
+            // Return a Stream to iterate through all the capsules in the time range.
+            //
+            // Streams are important to use here to avoid bringing all the data into memory to satisfy the
+            // request. The Seeq connector host will automatically "page" the data upload so that we don't hit memory
+            // ceilings on large requests. Streams can be created in a variety of ways, such as Guava's
+            // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
+            //
+            // The code within this function is largely specific to the simulator example. But it should give you an idea of
+            // some of the concerns you'll need to attend to.
+            Stream.Builder<Capsule> streamBuilder = Stream.builder();
+
+            while (tagValues.hasNext()) {
+                DatasourceSimulator.TagValue tagValue = tagValues.next();
+
+                TimeInstant start = new TimeInstant(tagValue.getStart());
+                TimeInstant end = new TimeInstant(tagValue.getEnd());
+
+                List<Capsule.Property> capsuleProperties = new ArrayList<>();
+                capsuleProperties.add(new Capsule.Property("Value", Double.toString(tagValue.getValue()), "rads"));
+
+                streamBuilder.accept(new Capsule(start, end, capsuleProperties));
+            }
+
+            return streamBuilder.build();
+        } finally {
+            // If you have any cleanup to do, do it in this finally block. This is guaranteed to be called if
+            // iteration is short-circuited for any reason.
+        }
+    }
+
+    @Override
     public void saveConfig() {
         // Configuration persistence is typically managed by the connector, which stores a list of all connection
         // configurations.
@@ -284,10 +341,5 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         relationship.setChildDataId(childDataId);
         relationship.setParentDataId(parentDataId);
         this.connectionService.putRelationship(relationship);
-    }
-
-    @Override
-    public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
-        return null;
     }
 }

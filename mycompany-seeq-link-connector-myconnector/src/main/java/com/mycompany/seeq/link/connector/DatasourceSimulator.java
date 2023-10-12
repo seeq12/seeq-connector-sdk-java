@@ -121,7 +121,13 @@ public class DatasourceSimulator {
     }
 
     public TagValue requestLastTagValue(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp) {
-        return this.query(dataId, startTimestamp, endTimestamp, 1).next();
+        Iterator<TagValue> iterator = this.query(dataId, startTimestamp, endTimestamp, 1);
+
+        if (iterator.hasNext()) {
+            return iterator.next();
+        } else {
+            return null;
+        }
     }
 
     public Iterator<TagValue> query(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
