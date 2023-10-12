@@ -9,15 +9,20 @@ import java.util.stream.Stream;
 import com.google.common.math.LongMath;
 import com.mycompany.seeq.link.connector.DatasourceSimulator.Waveform;
 import com.seeq.link.sdk.DefaultIndexingDatasourceConnectionConfig;
+import com.seeq.link.sdk.interfaces.ConditionPullDatasourceConnection;
 import com.seeq.link.sdk.interfaces.Connection.ConnectionState;
 import com.seeq.link.sdk.interfaces.DatasourceConnectionServiceV2;
+import com.seeq.link.sdk.interfaces.GetCapsulesParameters;
 import com.seeq.link.sdk.interfaces.GetSamplesParameters;
 import com.seeq.link.sdk.interfaces.SignalPullDatasourceConnection;
 import com.seeq.link.sdk.interfaces.SyncMode;
+import com.seeq.link.sdk.utilities.Capsule;
 import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
 import com.seeq.model.AssetInputV1;
 import com.seeq.model.AssetTreeSingleInputV1;
+import com.seeq.model.ConditionInputV1;
+import com.seeq.model.ConditionUpdateInputV1;
 import com.seeq.model.SignalWithIdInputV1;
 
 /**
@@ -36,7 +41,7 @@ import com.seeq.model.SignalWithIdInputV1;
  * obtained via {@link com.seeq.link.sdk.interfaces.SeeqApiProvider} on
  * {@link com.seeq.link.sdk.interfaces.AgentService} on {@link DatasourceConnectionServiceV2}.
  */
-public class MyConnection implements SignalPullDatasourceConnection {
+public class MyConnection implements SignalPullDatasourceConnection, ConditionPullDatasourceConnection {
     private final MyConnector connector;
     private final MyConnectionConfigV1 connectionConfig;
     private DatasourceConnectionServiceV2 connectionService;
@@ -144,13 +149,15 @@ public class MyConnection implements SignalPullDatasourceConnection {
 
     @Override
     public void index(SyncMode syncMode) {
+        String rootAssetId = this.createRootAsset();
+
         // Do whatever is necessary to generate the list of signals you want to show up in Seeq. It is generally
         // preferable to use a "streaming" method of iterating through the tags. I.e., try not to hold them all in
         // memory because it is harder to scale to indexing hundreds of thousands of signals. Although these examples
         // use Iterators (which can also be composed in a 'lazy' manner), you may want to consider using Java 8's
         // Streams, which are often friendlier and more convenient to use.
 
-        // Loop through all of the tags in our simulated datasource and tell Seeq Server about them
+        // Loop through all the tags in our simulated datasource and tell Seeq Server about them
         Iterator<DatasourceSimulator.Tag> tags = this.datasourceSimulator.getTags();
         while (tags.hasNext()) {
             DatasourceSimulator.Tag tag = tags.next();
@@ -176,18 +183,38 @@ public class MyConnection implements SignalPullDatasourceConnection {
             // If you need the signals to be written to Seeq Server before any other work continues, you can
             // call flushSignals() on the connection service.
             this.connectionService.putSignal(signal);
+
+            ConditionUpdateInputV1 condition = new ConditionUpdateInputV1();
+
+            // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
+            // to condition data. Data ID is a string and does not need to be numeric, even though we are just
+            // using a number in this example.
+            condition.setDataId(String.format("%d", tag.getId()));
+
+            // The Name is a string that is displayed in the UI. It can change (typically as a result of a
+            // rename operation happening in the source system), but the unique Data ID preserves appropriate
+            // linkages.
+            condition.setName(tag.getName());
+
+            // PutCondition() queues items up for performance reasons and writes them in batch to the server.
+            //
+            // If you need the conditions to be written to Seeq Server before any other work continues, you can
+            // call FlushConditions() on the connection service.
+            this.connectionService.putCondition(condition);
+
+            this.createChildAsset(rootAssetId, signal.getDataId(), signal.getName());
         }
     }
 
     @Override
     public Stream<Sample> getSamples(GetSamplesParameters parameters) {
-        // Return a stream to iterate through all of the samples in the time range.
+        // Return a stream to iterate through all the samples in the time range.
         //
         // Very important: You must return one sample 'on or earlier' than the requested interval and one sample 'on or
         // later' (if such samples exist). This allows Seeq to interpolate appropriately to the edge of the requested
         // time range.
         //
-        // Streams are important to use here to avoid bringing all of the data into memory to satisfy the
+        // Streams are important to use here to avoid bringing all the data into memory to satisfy the
         // request. The Seeq connector host will automatically "page" the data upload so that we don't hit memory
         // ceilings on large requests. Streams can be created in a variety of ways, such as Guava's
         // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
@@ -257,5 +284,10 @@ public class MyConnection implements SignalPullDatasourceConnection {
         relationship.setChildDataId(childDataId);
         relationship.setParentDataId(parentDataId);
         this.connectionService.putRelationship(relationship);
+    }
+
+    @Override
+    public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
+        return null;
     }
 }
