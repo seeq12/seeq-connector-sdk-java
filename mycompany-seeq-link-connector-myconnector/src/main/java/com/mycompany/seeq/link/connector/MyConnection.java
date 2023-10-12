@@ -16,6 +16,8 @@ import com.seeq.link.sdk.interfaces.SignalPullDatasourceConnection;
 import com.seeq.link.sdk.interfaces.SyncMode;
 import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
+import com.seeq.model.AssetInputV1;
+import com.seeq.model.AssetTreeSingleInputV1;
 import com.seeq.model.SignalWithIdInputV1;
 
 /**
@@ -193,10 +195,10 @@ public class MyConnection implements SignalPullDatasourceConnection {
         // The code within this function is largely specific to the simulator example. But it should give you an idea of
         // some of the concerns you'll need to attend to.
         return LongStream.rangeClosed(
-                LongMath.divide(parameters.getStartTime().getTimestamp(), this.samplePeriod.toNanos(),
-                        RoundingMode.FLOOR),
-                LongMath.divide(parameters.getEndTime().getTimestamp(), this.samplePeriod.toNanos(),
-                        RoundingMode.CEILING))
+                        LongMath.divide(parameters.getStartTime().getTimestamp(), this.samplePeriod.toNanos(),
+                                RoundingMode.FLOOR),
+                        LongMath.divide(parameters.getEndTime().getTimestamp(), this.samplePeriod.toNanos(),
+                                RoundingMode.CEILING))
                 .boxed()
                 .map(sampleIndex -> {
                     TimeInstant key = new TimeInstant(sampleIndex * this.samplePeriod.toNanos());
@@ -230,5 +232,30 @@ public class MyConnection implements SignalPullDatasourceConnection {
         // Configuration persistence is typically managed by the connector, which stores a list of all connection
         // configurations.
         this.connector.saveConfig();
+    }
+
+    private String createRootAsset() {
+        String datasourceDataId = this.connectionService.getDatasource().getId();
+
+        AssetInputV1 rootAsset = new AssetInputV1();
+        rootAsset.setDataId(datasourceDataId);
+        rootAsset.setName("My Datasource Name");
+        this.connectionService.putRootAsset(rootAsset);
+
+        return rootAsset.getDataId();
+    }
+
+    private void createChildAsset(String parentDataId, String childDataId, String childAssetName) {
+        // create the child asset
+        AssetInputV1 childAsset = new AssetInputV1();
+        childAsset.setDataId(childDataId);
+        childAsset.setName(childAssetName);
+        this.connectionService.putAsset(childAsset);
+
+        // create the child asset relationship to its parent
+        AssetTreeSingleInputV1 relationship = new AssetTreeSingleInputV1();
+        relationship.setChildDataId(childDataId);
+        relationship.setParentDataId(parentDataId);
+        this.connectionService.putRelationship(relationship);
     }
 }
