@@ -37,6 +37,7 @@ public class DatasourceSimulator {
         }
     }
 
+    // This is NOT intended for production use and is solely to model possible datasource response structures.
     public class TagValue {
         private final ZonedDateTime start;
         private final ZonedDateTime end;

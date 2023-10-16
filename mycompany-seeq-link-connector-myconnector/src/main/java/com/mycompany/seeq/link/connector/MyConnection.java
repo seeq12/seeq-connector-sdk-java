@@ -167,8 +167,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
             SignalWithIdInputV1 signal = new SignalWithIdInputV1();
 
             // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
-            // to signal / condition / asset data. Data ID is a string and does not need to be numeric, even
-            // though we are just using a number in this example.
+            // to signal/asset data. It is important that the Data ID be consistent across connections which means
+            // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
+            // Data ID is a string and does not need to be numeric, even though we are just using a number in
+            // this example.
             signal.setDataId(String.format("%d", tag.getId()));
 
             // The Name is a string that is displayed in the UI. It can change (typically as a result of a
@@ -190,8 +192,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
             ConditionUpdateInputV1 condition = new ConditionUpdateInputV1();
 
             // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
-            // to condition data. Data ID is a string and does not need to be numeric, even though we are just
-            // using a number in this example.
+            // to condition data. It is important that the Data ID be consistent across connections which means
+            // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
+            // Data ID is a string and does not need to be numeric, even though we are just using a number in
+            // this example.
             condition.setDataId(String.format("%d", tag.getId()));
 
             // The Name is a string that is displayed in the UI. It can change (typically as a result of a
