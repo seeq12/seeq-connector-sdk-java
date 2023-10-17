@@ -322,6 +322,9 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connector.saveConfig();
     }
 
+    // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the relationships
+    // between them. This means there needs to be a starting point; a root. This example shows how to create the root
+    // asset in the Seeq database.
     private String createRootAsset() {
         String datasourceDataId = this.connectionService.getDatasource().getId();
 
@@ -333,6 +336,8 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         return rootAsset.getDataId();
     }
 
+    // To extend the asset tree, a child asset can be created, this examples shows how to do that. To complete the process,
+    // a relationship needs to be established between the created asset an it's parent which this example also demonstrates.
     private void createChildAsset(String parentDataId, String childDataId, String childAssetName) {
         // create the child asset
         AssetInputV1 childAsset = new AssetInputV1();
