@@ -164,6 +164,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         Iterator<DatasourceSimulator.Tag> tags = this.datasourceSimulator.getTags();
         while (tags.hasNext()) {
             DatasourceSimulator.Tag tag = tags.next();
+            String tagId = String.format("%d", tag.getId());
+
+            this.createChildAsset(rootAssetId, tagId, tag.getName());
+
             SignalWithIdInputV1 signal = new SignalWithIdInputV1();
 
             // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
@@ -171,7 +175,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
             // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
             // Data ID is a string and does not need to be numeric, even though we are just using a number in
             // this example.
-            signal.setDataId(String.format("%d", tag.getId()));
+            signal.setDataId(tagId);
 
             // The Name is a string that is displayed in the UI. It can change (typically as a result of a
             // rename operation happening in the source system), but the unique Data ID preserves appropriate
@@ -208,8 +212,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
             // If you need the conditions to be written to Seeq Server before any other work continues, you can
             // call FlushConditions() on the connection service.
             this.connectionService.putCondition(condition);
-
-            this.createChildAsset(rootAssetId, signal.getDataId(), signal.getName());
         }
     }
 
@@ -264,6 +266,8 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
     @Override
     public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
         try {
+            // This is an example of how you may query your datasource for tag values and is specific to the
+            // simulator example. This should be replaced with a call to your own datasource-specific call.
             Iterator<DatasourceSimulator.TagValue> tagValues = this.datasourceSimulator.query(
                     parameters.getDataId(),
                     parameters.getStartTime(),

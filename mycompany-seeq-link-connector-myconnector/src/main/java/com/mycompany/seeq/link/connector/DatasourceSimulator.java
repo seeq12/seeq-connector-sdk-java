@@ -37,7 +37,8 @@ public class DatasourceSimulator {
         }
     }
 
-    // This is NOT intended for production use and is solely to model possible datasource response structures.
+    // This is NOT intended for production use and is solely to model possible
+    // datasource response structures.
     public class TagValue {
         private final ZonedDateTime start;
         private final ZonedDateTime end;
@@ -119,16 +120,6 @@ public class DatasourceSimulator {
         }
 
         return value;
-    }
-
-    public TagValue requestLastTagValue(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp) {
-        Iterator<TagValue> iterator = this.query(dataId, startTimestamp, endTimestamp, 1);
-
-        if (iterator.hasNext()) {
-            return iterator.next();
-        } else {
-            return null;
-        }
     }
 
     public Iterator<TagValue> query(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
