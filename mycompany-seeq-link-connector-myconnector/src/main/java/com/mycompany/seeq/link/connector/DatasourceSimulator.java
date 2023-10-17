@@ -132,7 +132,8 @@ public class DatasourceSimulator {
     }
 
     public Iterator<TagValue> query(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
-        // for consistent, reproducible behaviour
+        // To be able to yield consistent, reproducible tag values, we need a constant seed. This helps us
+        // approximate the behaviour of a real datasource which should be deterministic.
         final int seed = 1_000_000;
         Random random = new Random(seed);
         ZonedDateTime startTime = startTimestamp.toDateTime();
