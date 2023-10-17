@@ -263,20 +263,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     @Override
     public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
-        if (parameters.isLastCertainKeyRequested()) {
-            TimeInstant endTime = new TimeInstant(ZonedDateTime.now());
-            TimeInstant startTime = new TimeInstant(endTime.getTimestamp() - parameters.getMaxDuration());
-            DatasourceSimulator.TagValue lastTagValue = this.datasourceSimulator.requestLastTagValue(
-                    parameters.getDataId(),
-                    startTime,
-                    endTime
-            );
-
-            if (lastTagValue != null) {
-                parameters.setLastCertainKey(new TimeInstant(lastTagValue.getEnd()));
-            }
-        }
-
         try {
             Iterator<DatasourceSimulator.TagValue> tagValues = this.datasourceSimulator.query(
                     parameters.getDataId(),
