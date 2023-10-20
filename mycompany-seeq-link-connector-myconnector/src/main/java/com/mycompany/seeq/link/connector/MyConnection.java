@@ -165,53 +165,19 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         while (tags.hasNext()) {
             DatasourceSimulator.Tag tag = tags.next();
             String tagId = String.format("%d", tag.getId());
+            String tagName = tag.getName();
 
-            this.createChildAsset(rootAssetId, tagId, tag.getName());
+            // To extend the asset tree, a child asset can be created, this examples shows how to do that. To complete the process,
+            // a relationship needs to be established between the created asset an it's parent which this example also demonstrates.
+            this.createChildAsset(rootAssetId, tagId, tagName);
 
-            SignalWithIdInputV1 signal = new SignalWithIdInputV1();
+            this.createSignal(tagId, tagName, tag.getStepped());
 
-            // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
-            // to signal/asset data. It is important that the Data ID be consistent across connections which means
-            // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
-            // Data ID is a string and does not need to be numeric, even though we are just using a number in
-            // this example.
-            signal.setDataId(tagId);
+            this.createCondition(tagId, tagName);
 
-            // The Name is a string that is displayed in the UI. It can change (typically as a result of a
-            // rename operation happening in the source system), but the unique Data ID preserves appropriate
-            // linkages.
-            signal.setName(tag.getName());
 
-            // The interpolation method is the final piece of critical information for a signal.
-            signal.setInterpolationMethod(tag.getStepped()
-                    ? DatasourceConnectionServiceV2.InterpolationMethod.Step
-                    : DatasourceConnectionServiceV2.InterpolationMethod.Linear);
 
-            // putSignal() queues items up for performance reasons and writes them in batch to the server.
-            //
-            // If you need the signals to be written to Seeq Server before any other work continues, you can
-            // call flushSignals() on the connection service.
-            this.connectionService.putSignal(signal);
 
-            ConditionUpdateInputV1 condition = new ConditionUpdateInputV1();
-
-            // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
-            // to condition data. It is important that the Data ID be consistent across connections which means
-            // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
-            // Data ID is a string and does not need to be numeric, even though we are just using a number in
-            // this example.
-            condition.setDataId(String.format("%d", tag.getId()));
-
-            // The Name is a string that is displayed in the UI. It can change (typically as a result of a
-            // rename operation happening in the source system), but the unique Data ID preserves appropriate
-            // linkages.
-            condition.setName(tag.getName());
-
-            // PutCondition() queues items up for performance reasons and writes them in batch to the server.
-            //
-            // If you need the conditions to be written to Seeq Server before any other work continues, you can
-            // call FlushConditions() on the connection service.
-            this.connectionService.putCondition(condition);
         }
     }
 
@@ -312,9 +278,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connector.saveConfig();
     }
 
-    // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the relationships
-    // between them. This means there needs to be a starting point; a root. This example shows how to create the root
-    // asset in the Seeq database.
     private String createRootAsset() {
         String datasourceDataId = this.connectionService.getDatasource().getId();
 
@@ -326,8 +289,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         return rootAsset.getDataId();
     }
 
-    // To extend the asset tree, a child asset can be created, this examples shows how to do that. To complete the process,
-    // a relationship needs to be established between the created asset an it's parent which this example also demonstrates.
     private void createChildAsset(String parentDataId, String childDataId, String childAssetName) {
         // create the child asset
         AssetInputV1 childAsset = new AssetInputV1();
@@ -340,5 +301,55 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         relationship.setChildDataId(childDataId);
         relationship.setParentDataId(parentDataId);
         this.connectionService.putRelationship(relationship);
+    }
+
+    private void createSignal(String tagId, String tagName, boolean isStepped)
+    {
+        SignalWithIdInputV1 signal = new SignalWithIdInputV1();
+
+        // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
+        // to signal/asset data. It is important that the Data ID be consistent across connections which means
+        // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
+        // Data ID is a string and does not need to be numeric, even though we are just using a number in
+        // this example.
+        signal.setDataId(tagId);
+
+        // The Name is a string that is displayed in the UI. It can change (typically as a result of a
+        // rename operation happening in the source system), but the unique Data ID preserves appropriate
+        // linkages.
+        signal.setName(tagName);
+
+        // The interpolation method is the final piece of critical information for a signal.
+        signal.setInterpolationMethod(isStepped
+                ? DatasourceConnectionServiceV2.InterpolationMethod.Step
+                : DatasourceConnectionServiceV2.InterpolationMethod.Linear);
+
+        // putSignal() queues items up for performance reasons and writes them in batch to the server.
+        //
+        // If you need the signals to be written to Seeq Server before any other work continues, you can
+        // call flushSignals() on the connection service.
+        this.connectionService.putSignal(signal);
+    }
+
+    private void createCondition(String tagId, String tagName) {
+        ConditionUpdateInputV1 condition = new ConditionUpdateInputV1();
+
+        // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
+        // to condition data. It is important that the Data ID be consistent across connections which means
+        // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
+        // Data ID is a string and does not need to be numeric, even though we are just using a number in
+        // this example.
+        condition.setDataId(tagId);
+
+        // The Name is a string that is displayed in the UI. It can change (typically as a result of a
+        // rename operation happening in the source system), but the unique Data ID preserves appropriate
+        // linkages.
+        condition.setName(tagName);
+
+        // PutCondition() queues items up for performance reasons and writes them in batch to the server.
+        //
+        // If you need the conditions to be written to Seeq Server before any other work continues, you can
+        // call FlushConditions() on the connection service.
+        this.connectionService.putCondition(condition);
     }
 }
