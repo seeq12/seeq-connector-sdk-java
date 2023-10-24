@@ -152,6 +152,9 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     @Override
     public void index(SyncMode syncMode) {
+        // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the relationships
+        // between them. This means there needs to be a starting point; a root. This example shows how to create the root
+        // asset in the Seeq database.
         String rootAssetId = this.createRootAsset();
 
         // Do whatever is necessary to generate the list of signals you want to show up in Seeq. It is generally
@@ -303,8 +306,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connectionService.putRelationship(relationship);
     }
 
-    private void createSignal(String tagId, String tagName, boolean isStepped)
-    {
+    private void createSignal(String tagId, String tagName, boolean isStepped)    {
         SignalWithIdInputV1 signal = new SignalWithIdInputV1();
 
         // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
