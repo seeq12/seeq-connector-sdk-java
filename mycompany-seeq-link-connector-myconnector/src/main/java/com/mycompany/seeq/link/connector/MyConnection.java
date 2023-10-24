@@ -1,6 +1,7 @@
 package com.mycompany.seeq.link.connector;
 
 import java.math.RoundingMode;
+import java.sql.Time;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,12 +21,15 @@ import com.seeq.link.sdk.interfaces.GetSamplesParameters;
 import com.seeq.link.sdk.interfaces.SignalPullDatasourceConnection;
 import com.seeq.link.sdk.interfaces.SyncMode;
 import com.seeq.link.sdk.utilities.Capsule;
+import com.seeq.link.sdk.utilities.FormulaHelper;
 import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
 import com.seeq.model.AssetInputV1;
 import com.seeq.model.AssetTreeSingleInputV1;
 import com.seeq.model.ConditionInputV1;
 import com.seeq.model.ConditionUpdateInputV1;
+import com.seeq.model.ScalarInputV1;
+import com.seeq.model.ScalarPropertyV1;
 import com.seeq.model.SignalWithIdInputV1;
 
 /**
@@ -87,6 +91,20 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
     }
 
     @Override
+    public Integer getMaxConcurrentRequests() {
+        // This parameter can help control the load that Seeq puts on an external datasource. It is typically
+        // controlled from the configuration file.
+        return this.connectionConfig.getMaxConcurrentRequests();
+    }
+
+    @Override
+    public Integer getMaxResultsPerRequest() {
+        // This parameter can help control the load and memory usage that Seeq puts on an external datasource. It is
+        // typically controlled from the configuration file.
+        return this.connectionConfig.getMaxResultsPerRequest();
+    }
+
+    @Override
     public void initialize(DatasourceConnectionServiceV2 connectionService) {
         // You probably won't do much in the initialize() function. But if you have to do some I/O that is separate
         // from the act of connecting, you could do it here.
@@ -119,7 +137,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
         // Second, perform whatever I/O is necessary to establish a connection to your datasource. For example, you
         // might instantiate a JDBC connection object and connect to a SQL database.
-        this.datasourceSimulator = new DatasourceSimulator(this.connectionConfig.getTagCount(), signalPeriod);
+        this.datasourceSimulator = new DatasourceSimulator(signalPeriod);
 
         if (this.datasourceSimulator.connect()) {
             // If the connection is successful, transition to the CONNECTED state. The monitor() function will then
@@ -152,10 +170,12 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     @Override
     public void index(SyncMode syncMode) {
-        // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the relationships
-        // between them. This means there needs to be a starting point; a root. This example shows how to create the root
+        // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the
+        // relationships
+        // between them. This means there needs to be a starting point; a root. This example shows how to create the
+        // root
         // asset in the Seeq database.
-        String rootAssetId = this.createRootAsset();
+        String rootAssetId = this.syncRootAsset();
 
         // Do whatever is necessary to generate the list of signals you want to show up in Seeq. It is generally
         // preferable to use a "streaming" method of iterating through the tags. I.e., try not to hold them all in
@@ -164,28 +184,20 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // Streams, which are often friendlier and more convenient to use.
 
         // Loop through all the tags in our simulated datasource and tell Seeq Server about them
-        Iterator<DatasourceSimulator.Tag> tags = this.datasourceSimulator.getTags();
-        while (tags.hasNext()) {
-            DatasourceSimulator.Tag tag = tags.next();
-            String tagId = String.format("%d", tag.getId());
-            String tagName = tag.getName();
-
-            // To extend the asset tree, a child asset can be created, this examples shows how to do that. To complete the process,
-            // a relationship needs to be established between the created asset an it's parent which this example also demonstrates.
-            this.createChildAsset(rootAssetId, tagId, tagName);
-
-            this.createSignal(tagId, tagName, tag.getStepped());
-
-            this.createCondition(tagId, tagName);
-
-
-
-
-        }
+        this.syncAssets(rootAssetId);
     }
 
     @Override
     public Stream<Sample> getSamples(GetSamplesParameters parameters) {
+        // This is an example of how you may query your datasource for tag values and is specific to the
+        // simulator example. This should be replaced with your own datasource-specific call.
+        Iterable<DatasourceSimulator.Tag.Value> tagValues = this.datasourceSimulator.getTagValues(
+                parameters.getDataId(),
+                parameters.getStartTime(),
+                parameters.getEndTime(),
+                parameters.getSampleLimit()
+        );
+
         // Return a stream to iterate through all the samples in the time range.
         //
         // Very important: You must return one sample 'on or earlier' than the requested interval and one sample 'on or
@@ -199,45 +211,21 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         //
         // The code within this function is largely specific to the simulator example. But it should give you an idea of
         // some of the concerns you'll need to attend to.
-        return LongStream.rangeClosed(
-                        LongMath.divide(parameters.getStartTime().getTimestamp(), this.samplePeriod.toNanos(),
-                                RoundingMode.FLOOR),
-                        LongMath.divide(parameters.getEndTime().getTimestamp(), this.samplePeriod.toNanos(),
-                                RoundingMode.CEILING))
-                .boxed()
-                .map(sampleIndex -> {
-                    TimeInstant key = new TimeInstant(sampleIndex * this.samplePeriod.toNanos());
-                    double value = this.datasourceSimulator.query(Waveform.SINE, key.getTimestamp());
+        Stream.Builder<Sample> streamBuilder = Stream.builder();
 
-                    return new Sample().key(key).value(value);
-                })
-                .limit(parameters.getSampleLimit())
-                .onClose(() -> {
-                    // If you have any cleanup to do, do it in this onClose block. This is guaranteed to be called if
-                    // iteration is short-circuited for any reason.
-                });
-    }
+        for (DatasourceSimulator.Tag.Value tagValue: tagValues) {
+            streamBuilder.accept(new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
+        }
 
-    @Override
-    public Integer getMaxConcurrentRequests() {
-        // This parameter can help control the load that Seeq puts on an external datasource. It is typically
-        // controlled from the configuration file.
-        return this.connectionConfig.getMaxConcurrentRequests();
-    }
-
-    @Override
-    public Integer getMaxResultsPerRequest() {
-        // This parameter can help control the load and memory usage that Seeq puts on an external datasource. It is
-        // typically controlled from the configuration file.
-        return this.connectionConfig.getMaxResultsPerRequest();
+        return streamBuilder.build();
     }
 
     @Override
     public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
         try {
-            // This is an example of how you may query your datasource for tag values and is specific to the
-            // simulator example. This should be replaced with a call to your own datasource-specific call.
-            Iterator<DatasourceSimulator.TagValue> tagValues = this.datasourceSimulator.query(
+            // This is an example of how you may query your datasource for alarm events and is specific to the
+            // simulator example. This should be replaced with your own datasource-specific call.
+            Iterable<DatasourceSimulator.Alarm.Event> events = this.datasourceSimulator.getAlarmEvents(
                     parameters.getDataId(),
                     parameters.getStartTime(),
                     parameters.getEndTime(),
@@ -251,18 +239,17 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
             // ceilings on large requests. Streams can be created in a variety of ways, such as Guava's
             // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
             //
-            // The code within this function is largely specific to the simulator example. But it should give you an idea of
+            // The code within this function is largely specific to the simulator example. But it should give you an
+            // idea of
             // some of the concerns you'll need to attend to.
             Stream.Builder<Capsule> streamBuilder = Stream.builder();
 
-            while (tagValues.hasNext()) {
-                DatasourceSimulator.TagValue tagValue = tagValues.next();
-
-                TimeInstant start = new TimeInstant(tagValue.getStart());
-                TimeInstant end = new TimeInstant(tagValue.getEnd());
+            for (DatasourceSimulator.Alarm.Event event : events) {
+                TimeInstant start = new TimeInstant(event.getStart());
+                TimeInstant end = new TimeInstant(event.getEnd());
 
                 List<Capsule.Property> capsuleProperties = new ArrayList<>();
-                capsuleProperties.add(new Capsule.Property("Value", Double.toString(tagValue.getValue()), "rads"));
+                capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
 
                 streamBuilder.accept(new Capsule(start, end, capsuleProperties));
             }
@@ -281,9 +268,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connector.saveConfig();
     }
 
-    private String createRootAsset() {
+    private String syncRootAsset() {
         String datasourceDataId = this.connectionService.getDatasource().getId();
 
+        // create the root asset
         AssetInputV1 rootAsset = new AssetInputV1();
         rootAsset.setDataId(datasourceDataId);
         rootAsset.setName("My Datasource Name");
@@ -292,21 +280,53 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         return rootAsset.getDataId();
     }
 
-    private void createChildAsset(String parentDataId, String childDataId, String childAssetName) {
+    private void syncAssets(String rootAssetId) {
+        for (DatasourceSimulator.Element database : this.datasourceSimulator.getDatabases()) {
+            this.syncDatabase(database);
+            this.linkToParentAsset(rootAssetId, database.getId());
+
+            Iterable<DatasourceSimulator.Tag> tags = this.datasourceSimulator.getTagsForDatabase(database.getId());
+
+            for (DatasourceSimulator.Tag tag : tags) {
+                this.syncSignal(tag);
+                this.linkToParentAsset(database.getId(), tag.getId());
+            }
+
+            Iterable<DatasourceSimulator.Alarm> alarms =
+                    this.datasourceSimulator.getAlarmsForDatabase(database.getId());
+
+            for (DatasourceSimulator.Alarm alarm : alarms) {
+                this.syncCondition(alarm);
+                this.linkToParentAsset(database.getId(), alarm.getId());
+            }
+
+            Iterable<DatasourceSimulator.Constant> constants =
+                    this.datasourceSimulator.getConstantsForDatabase(database.getId());
+
+            for (DatasourceSimulator.Constant constant : constants) {
+                this.syncScalar(constant);
+                this.linkToParentAsset(database.getId(), constant.getId());
+            }
+        }
+    }
+
+    private void syncDatabase(DatasourceSimulator.Element database) {
         // create the child asset
         AssetInputV1 childAsset = new AssetInputV1();
-        childAsset.setDataId(childDataId);
-        childAsset.setName(childAssetName);
+        childAsset.setDataId(database.getId());
+        childAsset.setName(database.getName());
         this.connectionService.putAsset(childAsset);
+    }
 
-        // create the child asset relationship to its parent
+    private void linkToParentAsset(String parentAssetId, String childDataId) {
+        // create the child asset/condition/signal relationship to its parent
         AssetTreeSingleInputV1 relationship = new AssetTreeSingleInputV1();
         relationship.setChildDataId(childDataId);
-        relationship.setParentDataId(parentDataId);
+        relationship.setParentDataId(parentAssetId);
         this.connectionService.putRelationship(relationship);
     }
 
-    private void createSignal(String tagId, String tagName, boolean isStepped)    {
+    private void syncSignal(DatasourceSimulator.Tag tag) {
         SignalWithIdInputV1 signal = new SignalWithIdInputV1();
 
         // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
@@ -314,17 +334,27 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
         // Data ID is a string and does not need to be numeric, even though we are just using a number in
         // this example.
-        signal.setDataId(tagId);
+        signal.setDataId(tag.getId());
 
         // The Name is a string that is displayed in the UI. It can change (typically as a result of a
         // rename operation happening in the source system), but the unique Data ID preserves appropriate
         // linkages.
-        signal.setName(tagName);
+        signal.setName(tag.getName());
 
         // The interpolation method is the final piece of critical information for a signal.
-        signal.setInterpolationMethod(isStepped
+        signal.setInterpolationMethod(tag.getStepped()
                 ? DatasourceConnectionServiceV2.InterpolationMethod.Step
                 : DatasourceConnectionServiceV2.InterpolationMethod.Linear);
+
+        // Additional Properties are used to store and track "Scalars" which are "facts" about the signal/
+        // condition/asset i.e. a piece of data that does not change. Special care should be taken to
+        // ensure only non-null values are provided.
+        ScalarPropertyV1 providerProperty = new ScalarPropertyV1();
+        providerProperty.setName("Provider");
+        providerProperty.setValue("Seeq");
+        List<ScalarPropertyV1> additionalProperties = new ArrayList<>();
+        additionalProperties.add(providerProperty);
+        signal.setAdditionalProperties(additionalProperties);
 
         // putSignal() queues items up for performance reasons and writes them in batch to the server.
         //
@@ -333,7 +363,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connectionService.putSignal(signal);
     }
 
-    private void createCondition(String tagId, String tagName) {
+    private void syncCondition(DatasourceSimulator.Alarm alarm) {
         ConditionUpdateInputV1 condition = new ConditionUpdateInputV1();
 
         // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
@@ -341,17 +371,37 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
         // Data ID is a string and does not need to be numeric, even though we are just using a number in
         // this example.
-        condition.setDataId(tagId);
+        condition.setDataId(alarm.getId());
 
         // The Name is a string that is displayed in the UI. It can change (typically as a result of a
         // rename operation happening in the source system), but the unique Data ID preserves appropriate
         // linkages.
-        condition.setName(tagName);
+        condition.setName(alarm.getName());
 
         // PutCondition() queues items up for performance reasons and writes them in batch to the server.
         //
         // If you need the conditions to be written to Seeq Server before any other work continues, you can
         // call FlushConditions() on the connection service.
         this.connectionService.putCondition(condition);
+    }
+
+    private void syncScalar(DatasourceSimulator.Constant constant) {
+        ScalarInputV1 scalar = new ScalarInputV1();
+        scalar.setDataId(constant.getId());
+        scalar.setName(constant.getName());
+        scalar.setUnitOfMeasure(constant.getUnitOfMeasure());
+        scalar.setFormula(this.getFormula(constant.getValue()));
+        this.connectionService.putScalar(scalar);
+    }
+
+    private String getFormula(Object value) {
+        if (value instanceof String) {
+            return FormulaHelper.escapeStringAsFormula((String) value);
+        } else if (value instanceof ZonedDateTime) {
+            TimeInstant timeInstant = new TimeInstant((ZonedDateTime) value);
+            return timeInstant.getTimestamp() + "ns";
+        } else {
+            return value.toString();
+        }
     }
 }

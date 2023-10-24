@@ -18,7 +18,7 @@ public class DatasourceSimulator {
 
         public Element(int elementId) {
             this.id = Integer.toString(elementId);
-            this.name = "Simulated Element #" + elementId;
+            this.name = String.format("Simulated Element #%d", elementId);
         }
 
         public String getId() {
@@ -36,7 +36,7 @@ public class DatasourceSimulator {
 
         public Alarm(String elementId, int alarmId) {
             this.id = String.format("Element=%s;Alarm=%d", elementId, alarmId);
-            this.name = "Simulated Alarm #" + alarmId;
+            this.name = String.format("Simulated Alarm #%d", alarmId);
         }
 
         public String getId() {
@@ -113,15 +113,16 @@ public class DatasourceSimulator {
             }
         }
     }
+
     public class Constant {
         private String id;
         private String name;
-        private  String unitOfMeasure;
-        private  Object value;
+        private String unitOfMeasure;
+        private Object value;
 
-        public Constant(int elementId, int constantId, String unitOfMeasure, Object value) {
-            this.id = String.format("Element=%d;Constant=%d", elementId, constantId);
-            this.name = String.format("Simulated Constant #%d", elementId);
+        public Constant(String elementId, int constantId, String unitOfMeasure, Object value) {
+            this.id = String.format("Element=%s;Constant=%d", elementId, constantId);
+            this.name = String.format("Simulated Constant #%d", constantId);
             this.unitOfMeasure = unitOfMeasure;
             this.value = value;
         }
@@ -189,11 +190,19 @@ public class DatasourceSimulator {
                 .collect(Collectors.toList());
     }
 
+    public Iterable<Constant> getConstantsForDatabase(String elementId) {
+        int constantCount = RNG.nextInt(10);
+        return IntStream.range(1, constantCount + 1)
+                .mapToObj(constId -> new Constant(elementId, constId, "°C", constId * 10))
+                .collect(Collectors.toList());
+    }
+
     public enum Waveform {
         SINE
     }
 
-    public Iterable<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
+    public Iterable<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
+            int limit) {
         long samplePeriodInNanos = this.signalPeriod.toNanos();
         long leftBoundTimestamp = startTimestamp.getTimestamp() / samplePeriodInNanos;
         long rightBoundTimestamp = (endTimestamp.getTimestamp() + samplePeriodInNanos - 1) / samplePeriodInNanos;
@@ -222,7 +231,8 @@ public class DatasourceSimulator {
         };
     }
 
-    public Iterable<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp, int limit) {
+    public Iterable<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
+            int limit) {
         ZonedDateTime startTime = startTimestamp.toDateTime();
         ZonedDateTime endTime = endTimestamp.toDateTime();
         long timespanInMs = ChronoUnit.MILLIS.between(startTime, endTime);
@@ -254,7 +264,7 @@ public class DatasourceSimulator {
 
     private double getWaveformValue(Waveform waveform, long timestamp) {
         long signalPeriodInNanos = this.signalPeriod.toNanos();
-        double waveFraction = ((double)timestamp % signalPeriodInNanos) / signalPeriodInNanos;
+        double waveFraction = ((double) timestamp % signalPeriodInNanos) / signalPeriodInNanos;
         double value;
 
         switch (waveform) {
