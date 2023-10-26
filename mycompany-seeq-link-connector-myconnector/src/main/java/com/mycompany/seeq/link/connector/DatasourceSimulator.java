@@ -12,143 +12,11 @@ import com.seeq.link.sdk.utilities.TimeInstant;
 
 
 public class DatasourceSimulator {
-    public class Element {
-        private String id;
-        private String name;
-
-        public Element(int elementId) {
-            this.id = Integer.toString(elementId);
-            this.name = String.format("Simulated Element #%d", elementId);
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-    }
-
-    public class Alarm {
-        private String id;
-        private String name;
-
-        public Alarm(String elementId, int alarmId) {
-            this.id = String.format("Element=%s;Alarm=%d", elementId, alarmId);
-            this.name = String.format("Simulated Alarm #%d", alarmId);
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public static class Event {
-            private ZonedDateTime start;
-            private ZonedDateTime end;
-            private double intensity;
-
-            public Event(ZonedDateTime start, ZonedDateTime end, double intensity) {
-                this.start = start;
-                this.end = end;
-                this.intensity = intensity;
-            }
-
-            public ZonedDateTime getStart() {
-                return this.start;
-            }
-
-            public ZonedDateTime getEnd() {
-                return this.end;
-            }
-
-            public double getIntensity() {
-                return this.intensity;
-            }
-        }
-    }
-
-    public class Tag {
-        private String id;
-        private String name;
-        private boolean stepped;
-
-        public Tag(String elementId, int tagId, boolean stepped) {
-            this.id = String.format("Element=%s;Tag=%d", elementId, tagId);
-            this.name = String.format("Simulated Tag #%d", tagId);
-            this.stepped = stepped;
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public boolean getStepped() {
-            return this.stepped;
-        }
-
-        public static class Value {
-            private TimeInstant timestamp;
-            private double measure;
-
-            public Value(TimeInstant timestamp, double value) {
-                this.timestamp = timestamp;
-                this.measure = value;
-            }
-
-            public TimeInstant getTimestamp() {
-                return this.timestamp;
-            }
-
-            public double getMeasure() {
-                return this.measure;
-            }
-        }
-    }
-
-    public class Constant {
-        private String id;
-        private String name;
-        private String unitOfMeasure;
-        private Object value;
-
-        public Constant(String elementId, int constantId, String unitOfMeasure, Object value) {
-            this.id = String.format("Element=%s;Constant=%d", elementId, constantId);
-            this.name = String.format("Simulated Constant #%d", constantId);
-            this.unitOfMeasure = unitOfMeasure;
-            this.value = value;
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public String getUnitOfMeasure() {
-            return unitOfMeasure;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-    }
-
     // To be able to yield consistent, reproducible tag values, we need a constant seed. This helps us
     // approximate the behaviour of a real datasource which should be deterministic.
-    private final int RandomnessSeed = 1_000_000;
+    private static final int RANDOMNESS_SEED = 1_000_000;
 
-    private final Random RNG = new Random(RandomnessSeed);
+    private static final Random RNG = new Random(RANDOMNESS_SEED);
 
     private boolean connected;
     private Duration signalPeriod;
@@ -275,5 +143,139 @@ public class DatasourceSimulator {
         }
 
         return value;
+    }
+
+    // NOTE: the data structures in this file are purely for illustration purposes only
+    // and are here solely to approximate datasource response structures for syncing
+    public static class Element {
+        private String id;
+        private String name;
+
+        public Element(int elementId) {
+            this.id = Integer.toString(elementId);
+            this.name = String.format("Simulated Element #%d", elementId);
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+    }
+
+    public static class Alarm {
+        private String id;
+        private String name;
+
+        public Alarm(String elementId, int alarmId) {
+            this.id = String.format("Element=%s;Alarm=%d", elementId, alarmId);
+            this.name = String.format("Simulated Alarm #%d", alarmId);
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public static class Event {
+            private ZonedDateTime start;
+            private ZonedDateTime end;
+            private double intensity;
+
+            public Event(ZonedDateTime start, ZonedDateTime end, double intensity) {
+                this.start = start;
+                this.end = end;
+                this.intensity = intensity;
+            }
+
+            public ZonedDateTime getStart() {
+                return this.start;
+            }
+
+            public ZonedDateTime getEnd() {
+                return this.end;
+            }
+
+            public double getIntensity() {
+                return this.intensity;
+            }
+        }
+    }
+
+    public static class Tag {
+        private String id;
+        private String name;
+        private boolean stepped;
+
+        public Tag(String elementId, int tagId, boolean stepped) {
+            this.id = String.format("Element=%s;Tag=%d", elementId, tagId);
+            this.name = String.format("Simulated Tag #%d", tagId);
+            this.stepped = stepped;
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public boolean getStepped() {
+            return this.stepped;
+        }
+
+        public static class Value {
+            private TimeInstant timestamp;
+            private double measure;
+
+            public Value(TimeInstant timestamp, double value) {
+                this.timestamp = timestamp;
+                this.measure = value;
+            }
+
+            public TimeInstant getTimestamp() {
+                return this.timestamp;
+            }
+
+            public double getMeasure() {
+                return this.measure;
+            }
+        }
+    }
+
+    public static class Constant {
+        private String id;
+        private String name;
+        private String unitOfMeasure;
+        private Object value;
+
+        public Constant(String elementId, int constantId, String unitOfMeasure, Object value) {
+            this.id = String.format("Element=%s;Constant=%d", elementId, constantId);
+            this.name = String.format("Simulated Constant #%d", constantId);
+            this.unitOfMeasure = unitOfMeasure;
+            this.value = value;
+        }
+
+        public String getId() {
+            return this.id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getUnitOfMeasure() {
+            return unitOfMeasure;
+        }
+
+        public Object getValue() {
+            return value;
+        }
     }
 }
