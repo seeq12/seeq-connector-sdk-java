@@ -96,9 +96,7 @@ public class DatasourceSimulator {
                 .mapToObj(index -> {
                     ZonedDateTime start = ChronoUnit.NANOS.addTo(startTime, index * eventPeriodInNanos);
                     ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
-                    double randomValue = Math.random();
-
-                    return new Alarm.Event(start, end, randomValue);
+                    return new Alarm.Event(start, end, RNG.nextDouble());
                 })
                 .limit(limit)
                 .iterator();
