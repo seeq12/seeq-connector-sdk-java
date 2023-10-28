@@ -1,13 +1,15 @@
 package com.mycompany.seeq.link.connector;
 
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
+import com.google.common.math.LongMath;
 import com.seeq.link.sdk.utilities.TimeInstant;
 
 
@@ -72,62 +74,34 @@ public class DatasourceSimulator {
     public Iterable<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
         long samplePeriodInNanos = this.signalPeriod.toNanos();
-        long leftBoundTimestamp = startTimestamp.getTimestamp() / samplePeriodInNanos;
-        long rightBoundTimestamp = (endTimestamp.getTimestamp() + samplePeriodInNanos - 1) / samplePeriodInNanos;
-
-        return () -> new Iterator<>() {
-            private long sampleIndex = leftBoundTimestamp;
-            private long count = 0;
-
-            @Override
-            public boolean hasNext() {
-                return sampleIndex <= rightBoundTimestamp && count < limit;
-            }
-
-            @Override
-            public Tag.Value next() {
-                if (!hasNext()) {
-                    throw new RuntimeException();
-                }
-
-                TimeInstant key = new TimeInstant(sampleIndex * samplePeriodInNanos);
-                double value = getWaveformValue(Waveform.SINE, key.getTimestamp());
-                sampleIndex++;
-                count++;
-                return new Tag.Value(key, value);
-            }
-        };
+        return () -> LongStream.rangeClosed(
+                        LongMath.divide(startTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.FLOOR),
+                        LongMath.divide(endTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.CEILING)
+                )
+                .mapToObj(index -> {
+                    TimeInstant key = new TimeInstant(index * samplePeriodInNanos);
+                    double value = getWaveformValue(Waveform.SINE, key.getTimestamp());
+                    return new Tag.Value(key, value);
+                })
+                .limit(limit)
+                .iterator();
     }
 
     public Iterable<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
         ZonedDateTime startTime = startTimestamp.toDateTime();
-        ZonedDateTime endTime = endTimestamp.toDateTime();
-        long timespanInMs = ChronoUnit.MILLIS.between(startTime, endTime);
-        long timestampIncrement = timespanInMs / limit;
+        long eventPeriodInNanos = LongMath.divide((endTimestamp.getTimestamp() - startTimestamp.getTimestamp()),
+                limit, RoundingMode.FLOOR);
+        return () -> IntStream.range(0, limit)
+                .mapToObj(index -> {
+                    ZonedDateTime start = ChronoUnit.NANOS.addTo(startTime, index * eventPeriodInNanos);
+                    ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
+                    double randomValue = Math.random();
 
-        return () -> new Iterator<>() {
-            private int i = 0;
-
-            @Override
-            public boolean hasNext() {
-                return i < limit;
-            }
-
-            @Override
-            public Alarm.Event next() {
-                if (!hasNext()) {
-                    throw new RuntimeException();
-                }
-
-                ZonedDateTime start = ChronoUnit.MILLIS.addTo(startTime, timestampIncrement * i);
-                ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
-                double randomValue = Math.random();
-                i++;
-
-                return new Alarm.Event(start, end, randomValue);
-            }
-        };
+                    return new Alarm.Event(start, end, randomValue);
+                })
+                .limit(limit)
+                .iterator();
     }
 
     private double getWaveformValue(Waveform waveform, long timestamp) {
