@@ -1,17 +1,12 @@
 package com.mycompany.seeq.link.connector;
 
-import java.math.RoundingMode;
-import java.sql.Time;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import com.google.common.math.LongMath;
-import com.mycompany.seeq.link.connector.DatasourceSimulator.Waveform;
 import com.seeq.link.sdk.DefaultIndexingDatasourceConnectionConfig;
 import com.seeq.link.sdk.interfaces.ConditionPullDatasourceConnection;
 import com.seeq.link.sdk.interfaces.Connection.ConnectionState;
@@ -26,7 +21,6 @@ import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
 import com.seeq.model.AssetInputV1;
 import com.seeq.model.AssetTreeSingleInputV1;
-import com.seeq.model.ConditionInputV1;
 import com.seeq.model.ConditionUpdateInputV1;
 import com.seeq.model.ScalarInputV1;
 import com.seeq.model.ScalarPropertyV1;
@@ -211,13 +205,8 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         //
         // The code within this function is largely specific to the simulator example. But it should give you an idea of
         // some of the concerns you'll need to attend to.
-        Stream.Builder<Sample> streamBuilder = Stream.builder();
-
-        for (DatasourceSimulator.Tag.Value tagValue : tagValues) {
-            streamBuilder.accept(new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
-        }
-
-        return streamBuilder.build();
+        return StreamSupport.stream(tagValues.spliterator(), false)
+                .map(tagValue -> new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
     }
 
     @Override
@@ -253,19 +242,16 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // The code within this function is largely specific to the simulator example. But it should give you an
         // idea of
         // some of the concerns you'll need to attend to.
-        Stream.Builder<Capsule> streamBuilder = Stream.builder();
+        return StreamSupport.stream(events.spliterator(), false)
+                .map(event -> {
+                    TimeInstant start = new TimeInstant(event.getStart());
+                    TimeInstant end = new TimeInstant(event.getEnd());
 
-        for (DatasourceSimulator.Alarm.Event event : events) {
-            TimeInstant start = new TimeInstant(event.getStart());
-            TimeInstant end = new TimeInstant(event.getEnd());
+                    List<Capsule.Property> capsuleProperties = new ArrayList<>();
+                    capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
 
-            List<Capsule.Property> capsuleProperties = new ArrayList<>();
-            capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
-
-            streamBuilder.accept(new Capsule(start, end, capsuleProperties));
-        }
-
-        return streamBuilder.build();
+                    return new Capsule(start, end, capsuleProperties);
+                });
     }
 
     @Override
