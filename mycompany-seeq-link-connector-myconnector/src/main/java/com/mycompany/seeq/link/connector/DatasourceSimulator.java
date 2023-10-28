@@ -147,6 +147,10 @@ public class DatasourceSimulator {
 
     // NOTE: the data structures in this file are purely for illustration purposes only
     // and are here solely to approximate datasource response structures for syncing
+
+    /**
+     * This class defines an element that can be used for syncing assets
+     */
     public static class Element {
         private String id;
         private String name;
@@ -165,6 +169,9 @@ public class DatasourceSimulator {
         }
     }
 
+    /**
+     * This class defines an alarm that can be used for syncing conditions
+     */
     public static class Alarm {
         private String id;
         private String name;
@@ -207,6 +214,9 @@ public class DatasourceSimulator {
         }
     }
 
+    /**
+     * This class defines a tag that can be used for syncing signals
+     */
     public static class Tag {
         private String id;
         private String name;
@@ -249,6 +259,9 @@ public class DatasourceSimulator {
         }
     }
 
+    /**
+     * This class defines a constant that can be used for syncing scalars
+     */
     public static class Constant {
         private String id;
         private String name;

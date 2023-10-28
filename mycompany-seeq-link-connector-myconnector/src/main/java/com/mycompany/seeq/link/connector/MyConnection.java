@@ -213,7 +213,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // some of the concerns you'll need to attend to.
         Stream.Builder<Sample> streamBuilder = Stream.builder();
 
-        for (DatasourceSimulator.Tag.Value tagValue: tagValues) {
+        for (DatasourceSimulator.Tag.Value tagValue : tagValues) {
             streamBuilder.accept(new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
         }
 
@@ -222,43 +222,50 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     @Override
     public Stream<Capsule> getCapsules(GetCapsulesParameters parameters) throws Exception {
-        try {
-            // This is an example of how you may query your datasource for alarm events and is specific to the
-            // simulator example. This should be replaced with your own datasource-specific call.
-            Iterable<DatasourceSimulator.Alarm.Event> events = this.datasourceSimulator.getAlarmEvents(
-                    parameters.getDataId(),
-                    parameters.getStartTime(),
-                    parameters.getEndTime(),
-                    parameters.getCapsuleLimit()
-            );
-
-            // Return a Stream to iterate through all the capsules in the time range.
-            //
-            // Streams are important to use here to avoid bringing all the data into memory to satisfy the
-            // request. The Seeq connector host will automatically "page" the data upload so that we don't hit memory
-            // ceilings on large requests. Streams can be created in a variety of ways, such as Guava's
-            // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
-            //
-            // The code within this function is largely specific to the simulator example. But it should give you an
-            // idea of
-            // some of the concerns you'll need to attend to.
-            Stream.Builder<Capsule> streamBuilder = Stream.builder();
-
-            for (DatasourceSimulator.Alarm.Event event : events) {
-                TimeInstant start = new TimeInstant(event.getStart());
-                TimeInstant end = new TimeInstant(event.getEnd());
-
-                List<Capsule.Property> capsuleProperties = new ArrayList<>();
-                capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
-
-                streamBuilder.accept(new Capsule(start, end, capsuleProperties));
-            }
-
-            return streamBuilder.build();
-        } finally {
-            // If you have any cleanup to do, do it in this finally block. This is guaranteed to be called if
-            // iteration is short-circuited for any reason.
+        // If a "last certain key" is requested, then you MUST specify one by calling setLastCertainKey. This informs
+        // Seeq that there is a time boundary between certain and uncertain capsules: everything at or before the key
+        // is certain, whereas any capsule after the key is uncertain. If setLastCertainKey is not called, then all
+        // capsules are treated as uncertain
+        //
+        // This example connector does not explicitly control capsule certainty, so we don't make a call below, but we
+        // show how it would be done in your connector.
+        if (parameters.isLastCertainKeyRequested()) {
+            // ...but if we did make a call, this is what it would look like:
+            // parameters.setLastCertainKey(new TimeInstant(...));
         }
+
+        // This is an example of how you may query your datasource for alarm events and is specific to the
+        // simulator example. This should be replaced with your own datasource-specific call.
+        Iterable<DatasourceSimulator.Alarm.Event> events = this.datasourceSimulator.getAlarmEvents(
+                parameters.getDataId(),
+                parameters.getStartTime(),
+                parameters.getEndTime(),
+                parameters.getCapsuleLimit()
+        );
+
+        // Return a Stream to iterate through all the capsules in the time range.
+        //
+        // Streams are important to use here to avoid bringing all the data into memory to satisfy the
+        // request. The Seeq connector host will automatically "page" the data upload so that we don't hit memory
+        // ceilings on large requests. Streams can be created in a variety of ways, such as Guava's
+        // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
+        //
+        // The code within this function is largely specific to the simulator example. But it should give you an
+        // idea of
+        // some of the concerns you'll need to attend to.
+        Stream.Builder<Capsule> streamBuilder = Stream.builder();
+
+        for (DatasourceSimulator.Alarm.Event event : events) {
+            TimeInstant start = new TimeInstant(event.getStart());
+            TimeInstant end = new TimeInstant(event.getEnd());
+
+            List<Capsule.Property> capsuleProperties = new ArrayList<>();
+            capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
+
+            streamBuilder.accept(new Capsule(start, end, capsuleProperties));
+        }
+
+        return streamBuilder.build();
     }
 
     @Override
