@@ -124,8 +124,8 @@ public class DatasourceSimulator {
      * This class defines an element that can be used for syncing assets
      */
     public static class Element {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public Element(int elementId) {
             this.id = Integer.toString(elementId);
@@ -145,8 +145,8 @@ public class DatasourceSimulator {
      * This class defines an alarm that can be used for syncing conditions
      */
     public static class Alarm {
-        private String id;
-        private String name;
+        private final String id;
+        private final String name;
 
         public Alarm(String elementId, int alarmId) {
             this.id = String.format("Element=%s;Alarm=%d", elementId, alarmId);
@@ -162,11 +162,11 @@ public class DatasourceSimulator {
         }
 
         public static class Event {
-            private ZonedDateTime start;
-            private ZonedDateTime end;
-            private double intensity;
+            private final ZonedDateTime start;
+            private final ZonedDateTime end;
+            private final Object intensity;
 
-            public Event(ZonedDateTime start, ZonedDateTime end, double intensity) {
+            public Event(ZonedDateTime start, ZonedDateTime end, Object intensity) {
                 this.start = start;
                 this.end = end;
                 this.intensity = intensity;
@@ -180,7 +180,7 @@ public class DatasourceSimulator {
                 return this.end;
             }
 
-            public double getIntensity() {
+            public Object getIntensity() {
                 return this.intensity;
             }
         }
@@ -190,9 +190,9 @@ public class DatasourceSimulator {
      * This class defines a tag that can be used for syncing signals
      */
     public static class Tag {
-        private String id;
-        private String name;
-        private boolean stepped;
+        private final String id;
+        private final String name;
+        private final boolean stepped;
 
         public Tag(String elementId, int tagId, boolean stepped) {
             this.id = String.format("Element=%s;Tag=%d", elementId, tagId);
@@ -213,10 +213,10 @@ public class DatasourceSimulator {
         }
 
         public static class Value {
-            private TimeInstant timestamp;
-            private double measure;
+            private final TimeInstant timestamp;
+            private final Object measure;
 
-            public Value(TimeInstant timestamp, double value) {
+            public Value(TimeInstant timestamp, Object value) {
                 this.timestamp = timestamp;
                 this.measure = value;
             }
@@ -225,7 +225,7 @@ public class DatasourceSimulator {
                 return this.timestamp;
             }
 
-            public double getMeasure() {
+            public Object getMeasure() {
                 return this.measure;
             }
         }
@@ -235,10 +235,10 @@ public class DatasourceSimulator {
      * This class defines a constant that can be used for syncing scalars
      */
     public static class Constant {
-        private String id;
-        private String name;
-        private String unitOfMeasure;
-        private Object value;
+        private final String id;
+        private final String name;
+        private final String unitOfMeasure;
+        private final Object value;
 
         public Constant(String elementId, int constantId, String unitOfMeasure, Object value) {
             this.id = String.format("Element=%s;Constant=%d", elementId, constantId);
