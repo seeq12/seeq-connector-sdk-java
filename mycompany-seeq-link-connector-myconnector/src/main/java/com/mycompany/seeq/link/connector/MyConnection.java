@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import com.seeq.link.sdk.DefaultIndexingDatasourceConnectionConfig;
 import com.seeq.link.sdk.interfaces.ConditionPullDatasourceConnection;
@@ -185,7 +184,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
     public Stream<Sample> getSamples(GetSamplesParameters parameters) {
         // This is an example of how you may query your datasource for tag values and is specific to the
         // simulator example. This should be replaced with your own datasource-specific call.
-        Iterable<DatasourceSimulator.Tag.Value> tagValues = this.datasourceSimulator.getTagValues(
+        Stream<DatasourceSimulator.Tag.Value> tagValues = this.datasourceSimulator.getTagValues(
                 parameters.getDataId(),
                 parameters.getStartTime(),
                 parameters.getEndTime(),
@@ -205,8 +204,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         //
         // The code within this function is largely specific to the simulator example. But it should give you an idea of
         // some of the concerns you'll need to attend to.
-        return StreamSupport.stream(tagValues.spliterator(), false)
-                .map(tagValue -> new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
+        return tagValues.map(tagValue -> new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
     }
 
     @Override
@@ -225,7 +223,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
         // This is an example of how you may query your datasource for alarm events and is specific to the
         // simulator example. This should be replaced with your own datasource-specific call.
-        Iterable<DatasourceSimulator.Alarm.Event> events = this.datasourceSimulator.getAlarmEvents(
+        Stream<DatasourceSimulator.Alarm.Event> events = this.datasourceSimulator.getAlarmEvents(
                 parameters.getDataId(),
                 parameters.getStartTime(),
                 parameters.getEndTime(),
@@ -242,13 +240,12 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // The code within this function is largely specific to the simulator example. But it should give you an
         // idea of
         // some of the concerns you'll need to attend to.
-        return StreamSupport.stream(events.spliterator(), false)
-                .map(event -> {
+        return events.map(event -> {
                     TimeInstant start = new TimeInstant(event.getStart());
                     TimeInstant end = new TimeInstant(event.getEnd());
 
                     List<Capsule.Property> capsuleProperties = new ArrayList<>();
-                    capsuleProperties.add(new Capsule.Property("Value", Double.toString(event.getIntensity()), "rads"));
+                    capsuleProperties.add(new Capsule.Property("Value", event.getIntensity().toString(), "rads"));
 
                     return new Capsule(start, end, capsuleProperties);
                 });

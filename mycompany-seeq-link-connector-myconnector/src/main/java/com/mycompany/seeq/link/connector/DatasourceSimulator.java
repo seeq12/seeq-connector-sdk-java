@@ -5,9 +5,9 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import com.google.common.math.LongMath;
 import com.seeq.link.sdk.utilities.TimeInstant;
@@ -41,40 +41,40 @@ public class DatasourceSimulator {
 
     public Iterable<Element> getDatabases() {
         int databaseCount = RNG.nextInt(10);
-        return IntStream.range(1, databaseCount + 1)
+        return () -> IntStream.rangeClosed(1, databaseCount)
                 .mapToObj(Element::new)
-                .collect(Collectors.toList());
+                .iterator();
     }
 
     public Iterable<Alarm> getAlarmsForDatabase(String elementId) {
         int alarmCount = RNG.nextInt(10);
-        return IntStream.range(1, alarmCount + 1)
+        return () -> IntStream.rangeClosed(1, alarmCount)
                 .mapToObj(alarmId -> new Alarm(elementId, alarmId))
-                .collect(Collectors.toList());
+                .iterator();
     }
 
     public Iterable<Tag> getTagsForDatabase(String elementId) {
         int tagCount = RNG.nextInt(10);
-        return IntStream.range(1, tagCount + 1)
+        return () -> IntStream.rangeClosed(1, tagCount)
                 .mapToObj(tagId -> new Tag(elementId, tagId, tagId % 2 == 0))
-                .collect(Collectors.toList());
+                .iterator();
     }
 
     public Iterable<Constant> getConstantsForDatabase(String elementId) {
         int constantCount = RNG.nextInt(10);
-        return IntStream.range(1, constantCount + 1)
+        return () -> IntStream.rangeClosed(1, constantCount)
                 .mapToObj(constId -> new Constant(elementId, constId, "°C", constId * 10))
-                .collect(Collectors.toList());
+                .iterator();
     }
 
     public enum Waveform {
         SINE
     }
 
-    public Iterable<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
+    public Stream<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
         long samplePeriodInNanos = this.signalPeriod.toNanos();
-        return () -> LongStream.rangeClosed(
+        return LongStream.rangeClosed(
                         LongMath.divide(startTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.FLOOR),
                         LongMath.divide(endTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.CEILING)
                 )
@@ -83,23 +83,21 @@ public class DatasourceSimulator {
                     double value = getWaveformValue(Waveform.SINE, key.getTimestamp());
                     return new Tag.Value(key, value);
                 })
-                .limit(limit)
-                .iterator();
+                .limit(limit);
     }
 
-    public Iterable<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
+    public Stream<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
         ZonedDateTime startTime = startTimestamp.toDateTime();
         long eventPeriodInNanos = LongMath.divide((endTimestamp.getTimestamp() - startTimestamp.getTimestamp()),
                 limit, RoundingMode.FLOOR);
-        return () -> IntStream.range(0, limit)
+        return IntStream.range(0, limit)
                 .mapToObj(index -> {
                     ZonedDateTime start = ChronoUnit.NANOS.addTo(startTime, index * eventPeriodInNanos);
                     ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
                     return new Alarm.Event(start, end, RNG.nextDouble());
                 })
-                .limit(limit)
-                .iterator();
+                .limit(limit);
     }
 
     private double getWaveformValue(Waveform waveform, long timestamp) {
