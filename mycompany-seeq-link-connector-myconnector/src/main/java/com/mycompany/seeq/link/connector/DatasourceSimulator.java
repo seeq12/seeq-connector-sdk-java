@@ -21,9 +21,11 @@ public class DatasourceSimulator {
     private static final Random RNG = new Random(RANDOMNESS_SEED);
 
     private boolean connected;
+    private Duration samplePeriod;
     private Duration signalPeriod;
 
-    public DatasourceSimulator(Duration signalPeriod) {
+    public DatasourceSimulator(Duration samplePeriod, Duration signalPeriod) {
+        this.samplePeriod = samplePeriod;
         this.signalPeriod = signalPeriod;
     }
 
@@ -73,7 +75,7 @@ public class DatasourceSimulator {
 
     public Stream<Tag.Value> getTagValues(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
-        long samplePeriodInNanos = this.signalPeriod.toNanos();
+        long samplePeriodInNanos = this.samplePeriod.toNanos();
         return LongStream.rangeClosed(
                         LongMath.divide(startTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.FLOOR),
                         LongMath.divide(endTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.CEILING)

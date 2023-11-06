@@ -46,7 +46,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
     private final MyConnectionConfigV1 connectionConfig;
     private DatasourceConnectionServiceV2 connectionService;
     private DatasourceSimulator datasourceSimulator;
-    private Duration samplePeriod;
 
     public MyConnection(MyConnector connector, MyConnectionConfigV1 connectionConfig) {
         // You will generally want to accept a configuration object from your connector parent. Do not do any I/O in the
@@ -118,19 +117,19 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         this.connectionService.setConnectionState(ConnectionState.CONNECTING);
 
         // These lines are specific to the simulator example.
-        this.samplePeriod = Duration.parse("PT" + this.connectionConfig.getSamplePeriod().toUpperCase());
-        Duration signalPeriod = this.samplePeriod.multipliedBy(100);
+        Duration samplePeriod = Duration.parse("PT" + this.connectionConfig.getSamplePeriod().toUpperCase());
+        Duration signalPeriod = samplePeriod.multipliedBy(100);
 
         // Use logging statements to show important information in the log files. These logging statements will be
         // output to the console when you're in the IDE and also to "java/seeq-link-sdk-debugging-agent/target/log/
         // jvm-debugging-agent.log" within the Connector SDK. When you have deployed your connector, the log statements
         // will go to the "log/jvm-link/jvm-link.log" file in the Seeq data folder.
-        this.connectionService.log().debug("Sample period parsed as '{}'", this.samplePeriod);
+        this.connectionService.log().debug("Sample period parsed as '{}'", samplePeriod);
         this.connectionService.log().debug("Signal period determined to be '{}'", signalPeriod);
 
         // Second, perform whatever I/O is necessary to establish a connection to your datasource. For example, you
         // might instantiate a JDBC connection object and connect to a SQL database.
-        this.datasourceSimulator = new DatasourceSimulator(signalPeriod);
+        this.datasourceSimulator = new DatasourceSimulator(samplePeriod, signalPeriod);
 
         if (this.datasourceSimulator.connect()) {
             // If the connection is successful, transition to the CONNECTED state. The monitor() function will then
@@ -204,7 +203,11 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         //
         // The code within this function is largely specific to the simulator example. But it should give you an idea of
         // some of the concerns you'll need to attend to.
-        return tagValues.map(tagValue -> new Sample(tagValue.getTimestamp(), tagValue.getMeasure()));
+        return tagValues.map(tagValue -> new Sample(tagValue.getTimestamp(), tagValue.getMeasure()))
+                .onClose(() -> {
+                    // If you have any cleanup to do, do it in this onClose block. This is guaranteed to be called if
+                    // iteration is short-circuited for any reason.
+                });
     }
 
     @Override
@@ -248,6 +251,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
                     capsuleProperties.add(new Capsule.Property("Value", event.getIntensity().toString(), "rads"));
 
                     return new Capsule(start, end, capsuleProperties);
+                })
+                .onClose(() -> {
+                    // If you have any cleanup to do, do it in this onClose block. This is guaranteed to be called if
+                    // iteration is short-circuited for any reason.
                 });
     }
 
