@@ -375,6 +375,11 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // linkages.
         condition.setName(alarm.getName());
 
+        // The Maximum Duration is a time span (made up by a combination of a value and a time unit e.g. 1h,
+        // 2m etc.) that indicates the maximum duration of capsules in this series and is required for stored
+        // conditions like this example.
+        condition.setMaximumDuration("2h");
+
         // PutCondition() queues items up for performance reasons and writes them in batch to the server.
         //
         // If you need the conditions to be written to Seeq Server before any other work continues, you can
@@ -384,10 +389,28 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     private void syncScalar(DatasourceSimulator.Constant constant) {
         ScalarInputV1 scalar = new ScalarInputV1();
+
+        // The Data ID is a string that is unique within the data source, and is used by Seeq when referring
+        // to scalar data. It is important that the Data ID be consistent across connections which means
+        // that transient values like generated GUID/UUIDs or the Datasource name would not be ideal. The
+        // Data ID is a string and does not need to be numeric, even though we are just using a number in
+        // this example.
         scalar.setDataId(constant.getId());
+
+        // The Name is a string that is displayed in the UI. It can change (typically as a result of a
+        // rename operation happening in the source system), but the unique Data ID preserves appropriate
+        // linkages.
         scalar.setName(constant.getName());
+
+        // The Unit Of Measure is a string that denotes what the unit of measure of the scalar value is.
         scalar.setUnitOfMeasure(constant.getUnitOfMeasure());
+
         scalar.setFormula(this.getFormula(constant.getValue()));
+
+        // PutScalar() queues items up for performance reasons and writes them in batch to the server.
+        //
+        // If you need the scalars to be written to Seeq Server before any other work continues, you can
+        // call FlushScalars() on the connection service.
         this.connectionService.putScalar(scalar);
     }
 
