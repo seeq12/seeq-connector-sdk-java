@@ -59,8 +59,9 @@ public class Main {
     }
 
     private static Path getSeeqDataFolder(){
-        String path = "seeq-link-sdk-debugging-agent/src/main/resources/data";
-        File file = new File(path);
+        URL resource = Main.class.getClassLoader().getResource("data/");
+        assert resource != null;
+        File file = new File(resource.getPath());
         return Path.of(file.getAbsolutePath());
     }
 }
