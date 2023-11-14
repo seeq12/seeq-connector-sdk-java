@@ -90,12 +90,13 @@ public class DatasourceSimulator {
 
     public Stream<Alarm.Event> getAlarmEvents(String dataId, TimeInstant startTimestamp, TimeInstant endTimestamp,
             int limit) {
-        ZonedDateTime startTime = startTimestamp.toDateTime();
-        long eventPeriodInNanos = LongMath.divide((endTimestamp.getTimestamp() - startTimestamp.getTimestamp()),
-                limit, RoundingMode.FLOOR);
-        return IntStream.range(0, limit)
+        long samplePeriodInNanos = this.samplePeriod.toNanos();
+        return LongStream.rangeClosed(
+                        LongMath.divide(startTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.FLOOR),
+                        LongMath.divide(endTimestamp.getTimestamp(), samplePeriodInNanos, RoundingMode.CEILING)
+                )
                 .mapToObj(index -> {
-                    ZonedDateTime start = ChronoUnit.NANOS.addTo(startTime, index * eventPeriodInNanos);
+                    ZonedDateTime start = new TimeInstant(index * samplePeriodInNanos).toDateTime();
                     ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
                     return new Alarm.Event(start, end, RNG.nextDouble());
                 })
