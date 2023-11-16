@@ -7,9 +7,9 @@ group = "com.mycompany.seeq.link.connector"
 version = "0.1.0-SNAPSHOT"
 
 dependencies {
-    compileOnly("com.seeq.link:seeq-link-sdk:59.1.1-v202301172059")
+    compileOnly("com.seeq.link:seeq-link-sdk:61.1.10-v202310270041")
 
-    testImplementation("com.seeq.link:seeq-link-sdk:59.1.1-v202301172059")
+    testImplementation("com.seeq.link:seeq-link-sdk:61.1.10-v202310270041")
     testImplementation("junit:junit:4.12")
     testImplementation("org.mockito:mockito-core:4.1.0")
     testImplementation("org.assertj:assertj-core:3.19.0")

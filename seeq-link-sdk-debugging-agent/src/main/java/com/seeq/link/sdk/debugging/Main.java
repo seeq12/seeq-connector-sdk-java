@@ -51,7 +51,7 @@ public class Main {
         }
 
         Path connectorSdkRoot = executingAssemblyLocation.getParent().getParent().getParent().getParent().getParent();
-        String searchPath = connectorSdkRoot.toString() + "/*connector*/build/install/*connector*/*.jar";
+        String searchPath = connectorSdkRoot.toString() + "/*connector*/build/libs/*connector*.jar";
 
         config.setConnectorSearchPaths(searchPath);
 
@@ -59,8 +59,9 @@ public class Main {
     }
 
     private static Path getSeeqDataFolder(){
-        String path = "src/main/resources/data";
-        File file = new File(path);
+        URL resource = Main.class.getClassLoader().getResource("data/");
+        assert resource != null;
+        File file = new File(resource.getPath());
         return Path.of(file.getAbsolutePath());
     }
 }
