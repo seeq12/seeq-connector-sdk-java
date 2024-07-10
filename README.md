@@ -8,41 +8,30 @@ and facilitate access to data in Seeq.
 Seeq connectors can be written in Java or C# but this repository is intended to be used for developing Java 
 Connectors. Java development can occur on Windows, OSX or Ubuntu operating systems.
 
-It is recommended that you initially develop with a "private" version of Seeq Server that is unrelated to your production or official testing systems. You should install this private version directly on your development machine to minimize the amount of initial setup and troubleshooting.
-
-Install the version of Seeq Server that matches the version of the Connector SDK that you are using.
-
-If you need a license file for this purpose, contact [support@seeq.com](mailto:support@seeq.com).
+It is recommended that you initially test with a "test" version of your Seeq Remote Agent. This will seperate your production connections from your test connections, allowing you to restart the remote agent without impacting users. This repository contains an embedded remote agent that allows your development environment to interactively debug your connector. 
 
 Environment Setup
 =================
 
 ## The Build Environment
 
-Before proceeding we recommend you to install java 11 from 
-https://docs.aws.amazon.com/corretto/latest/corretto-11-ug/downloads-list.html and change your build/build.bat 
+Before proceeding we recommend you to install java 21 from 
+https://docs.aws.amazon.com/corretto/latest/corretto-21-ug/downloads-list.html and change your build/build.bat 
 scripts to set the JAVA_HOME variable to the location where your java is installed. 
 The Java version of the SDK is built with Gradle. We recommend that you
-familiarize yourself with the [basics of Gradle](https://docs.gradle.org/current/userguide
-/tutorial_using_tasks.html) before proceeding.
+familiarize yourself with the [basics of Gradle](https://docs.gradle.org/current/userguide/tutorial_using_tasks.html) before proceeding.
 
 ## Verifying your Environment
 
 Before doing anything else, we recommend that you build the connector template and ensure that it is fully working with
-your private system.
+your system.
 
 From the root directory, execute the `build` command. This command will download dependencies from the web, so make
-sure you have a good internet connection. If it fails for some (non-obvious) reason, email the output (including the
-error message) to [support@seeq.com](mailto:support@seeq.com).
-
-Make sure your private Seeq Server is running on this machine.
+sure you have a good internet connection. If you have any non-obvious issues building this project, please post your
+issue along with any error messages on the [Seeq Developer Club forum](https://www.seeq.org/forum/25-seeq-developer-club/). 
 
 IntelliJ IDEA is the recommended Integrated Development Environment (IDE) to use for developing and debugging your
 connector. You can use the free IntelliJ IDEA Community Edition.
-
-Previous versions of the Seeq Connector SDK recommended and utilized Eclipse and the Maven build system. This version
-uses the Gradle build system and support for Gradle in Eclipse is not strong enough to recommend as an IDE for your
-connector.
 
 Import the project into IntelliJ IDEA by taking the following steps:
 
@@ -66,8 +55,11 @@ Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
+1. Retrieve the agent_api_key from your Seeq Server by logging in as a Seeq Administrator and navigating to the API
+   Documentation page. Expand the System group and expand GET /system/agentKey. Click Execute
 1. Modify the `agent_api_key` in `resources\data\keys\agent.key` my replacing the `<your_agent_api_key>`
-   with the key that is located in the top right of your Seeq Administration page
+   with the key that is located in the top response from the previous step. Note: it should only include the value. For
+   example if the return was `{"agentKey": "superSecret123"}` then the key is `superSecret123`
 1. Set a breakpoint on the first line of the `main()` function.
 1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
    right-click on
@@ -112,18 +104,21 @@ to the debug console and to the `java/seeq-link-sdk-debugging-agent/build/log/jv
 
 ## Deploying your Connector
 
-When you are ready to deploy your connector to a production environment, execute the `build` command. A zip file will be
+When you are ready to deploy your connector to a test or production remote agent, execute the `build` command. A zip file will be
 created in the `build/distributions` folder of your connector.
 
-Copy this zip file to the Seeq Server you wish to deploy it to. Shut down the server and extract the contents of the zip
-file into the `plugins/connectors` folder within Seeq's `data` folder. (The data folder is usually
-`C:\ProgramData\Seeq\data` on Windows and `~/.seeq/data` on Ubuntu and OSX.) You should end up with one new folder in
-`plugins/connectors`. For example, if you kept the default name for the connector, you would have a
-`plugins/connectors/mycompany-seeq-link-connector-myconnector` folder with a jar file inside.
+1. Shut down the Seeq Remote Agent - execute `seeq stop` in the Seeq CLI
+1. Verify that you have enabled support for plugins
+   1. execute `seeq config get Features/Plugins/Enabled` in the Seeq CLI
+   1. Ensure the value is `True`
+   1. If it is not then execute `seeq config set Features/Plugins/Enabled True`
+1. Copy the generated zip file to the `plugins/connectors` folder within Seeq's `data` folder (The data folder 
+   is usually `C:\ProgramData\Seeq\data`)
+1. Extract the contents of the zip file.
+1. Start the Seeq Remote Agent - execute `seeq start` in the Seeq CLI
 
-Re-start Seeq Server and your connector should appear in the list of connections just as it had in your development
-environment.
+You should see your connector show up in Seeq when you go to add a datasource in the Seeq Administration Panel and you choose
+your remote agent.
 
 Once deployed, log messages you create using the `log()` method on `ConnectorServiceV2`
-and `DatasourceConnectionServiceV2`
-will go to `log/jvm-link/jvm-link.log` file in the Seeq data folder.
+and `DatasourceConnectionServiceV2` will go to `log/jvm-link/jvm-link.log` file in the Seeq data folder.
