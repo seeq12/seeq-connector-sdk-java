@@ -27,7 +27,7 @@ Before doing anything else, we recommend that you build the connector template a
 your system.
 
 From the root directory, execute the `build` command. This command will download dependencies from the web, so make
-sure you have a good internet connection. If you have any non-obvious issues building this project. Please post your
+sure you have a good internet connection. If you have any non-obvious issues building this project, please post your
 issue along with any error messages on the [Seeq Developer Club forum](https://www.seeq.org/forum/25-seeq-developer-club/). 
 
 IntelliJ IDEA is the recommended Integrated Development Environment (IDE) to use for developing and debugging your
@@ -55,7 +55,7 @@ Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
-1. Retrieve the agent_api_key from your Seeq Server by loggin in as a Seeq Administrator and navigating to the API
+1. Retrieve the agent_api_key from your Seeq Server by logging in as a Seeq Administrator and navigating to the API
    Documentation page. Expand the System group and expand GET /system/agentKey. Click Execute
 1. Modify the `agent_api_key` in `resources\data\keys\agent.key` my replacing the `<your_agent_api_key>`
    with the key that is located in the top response from the previous step. Note: it should only include the value. For
@@ -112,7 +112,7 @@ created in the `build/distributions` folder of your connector.
    1. execute `seeq config get Features/Plugins/Enabled` in the Seeq CLI
    1. Ensure the value is `True`
    1. If it is not then execute `seeq config set Features/Plugins/Enabled True`
-1. Copy the generate zip file to the `plugins/connectors` folder within Seeq's `data` folder (The data folder 
+1. Copy the generated zip file to the `plugins/connectors` folder within Seeq's `data` folder (The data folder 
    is usually `C:\ProgramData\Seeq\data`)
 1. Extract the contents of the zip file.
 1. Start the Seeq Remote Agent - execute `seeq start` in the Seeq CLI
