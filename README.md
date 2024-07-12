@@ -108,10 +108,6 @@ When you are ready to deploy your connector to a test or production remote agent
 created in the `build/distributions` folder of your connector.
 
 1. Shut down the Seeq Remote Agent - execute `seeq stop` in the Seeq CLI
-1. Verify that you have enabled support for plugins
-   1. execute `seeq config get Features/Plugins/Enabled` in the Seeq CLI
-   1. Ensure the value is `True`
-   1. If it is not then execute `seeq config set Features/Plugins/Enabled True`
 1. Copy the generated zip file to the `plugins/connectors` folder within Seeq's `data` folder (The data folder 
    is usually `C:\ProgramData\Seeq\data`)
 1. Extract the contents of the zip file.
