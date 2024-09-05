@@ -6,10 +6,10 @@ import com.seeq.link.sdk.DefaultPullDatasourceConnectionConfig;
  * The configuration object should be a Plain Old Java Object (POJO) with little to no logic, just fields.
  */
 public class MyConnectionConfigV1 extends DefaultPullDatasourceConnectionConfig {
-    private int tagCount;
+    private Integer tagCount;
     private String samplePeriod;
 
-    public int getTagCount() {
+    public Integer getTagCount() {
         return this.tagCount;
     }
 
