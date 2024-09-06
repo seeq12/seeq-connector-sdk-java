@@ -1,0 +1,20 @@
+{
+  "Description": "This test checks correctness of queries that return a sample that starts one nanosecond after StartTime",
+  "GetSamplesParameters": {
+    "StartTime": "2024-07-31T23:59:59.999999999Z",
+    "EndTime": "2024-08-01T00:00:01.000000Z",
+    "MaxDurationNanos": 3600000000000,
+    "SampleLimit": 1000,
+    "ValueUnitOfMeasure": null
+  },
+  "ExpectedSamples": [
+    {
+      "IsoTimestamp": "2024-08-01T00:00:00.000000Z",
+      "Value": 0
+    },
+    {
+      "IsoTimestamp": "2024-08-01T00:00:01.000000Z",
+      "Value": 0.062790519529313402
+    }
+  ]
+}
