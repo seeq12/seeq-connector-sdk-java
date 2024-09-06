@@ -7,6 +7,9 @@ import com.seeq.link.sdk.testframework.IndexingConnectionTestSuite;
 
 public class MyConnectorSignalStandardTest extends IndexingConnectionTestSuite<MyConnection, MyConnector,
         MyConnectionConfigV1, MyConnectorConfigV1> {
+    private MyConnector myConnector;
+    private MyConnection myConnection;
+
     @Override
     public void indexingConnectionOneTimeSetUp() {
 
@@ -14,12 +17,12 @@ public class MyConnectorSignalStandardTest extends IndexingConnectionTestSuite<M
 
     @Override
     public MyConnection getConnection() {
-        return null;
+        return myConnection;
     }
 
     @Override
     public MyConnector getConnector() {
-        return null;
+        return myConnector;
     }
 
     @Override
@@ -34,6 +37,6 @@ public class MyConnectorSignalStandardTest extends IndexingConnectionTestSuite<M
 
     @Override
     public List<ConfigObject> getConnectorConfigVersions() {
-        return List.of();
+        return List.of(new MyConnectorConfigV1());
     }
 }
