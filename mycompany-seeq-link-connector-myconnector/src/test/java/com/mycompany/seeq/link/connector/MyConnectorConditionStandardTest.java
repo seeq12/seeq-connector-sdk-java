@@ -52,7 +52,7 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
         return myConnector;
     }
 
-    /**
+    /*
      * If for some reason, you need to ignore any standard test in the suite, use this method to specify. An example
      * can be seen in the {@link MyConnectorSignalStandardTest#getIgnoredTests()} method.
      */
@@ -61,7 +61,7 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
         return List.of();
     }
 
-    /**
+    /*
      * Use this method to configure the connector and connection that should be used for all standard tests in
      * the suite
      */
