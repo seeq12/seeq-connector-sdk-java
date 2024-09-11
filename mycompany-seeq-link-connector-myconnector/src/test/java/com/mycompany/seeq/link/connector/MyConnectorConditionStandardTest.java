@@ -13,7 +13,7 @@ import com.seeq.link.sdk.testframework.ConditionPullConnectionTestSuite;
 
 public class MyConnectorConditionStandardTest extends ConditionPullConnectionTestSuite<MyConnection, MyConnector,
         MyConnectionConfigV1, MyConnectorConfigV1> {
-    private MyConnector myConnector;
+    private MyConnector myConnectorMock;
     private MyConnection myConnection;
 
     private final Map<StandardTest, String> DATA_IDS_FOR_STANDARD_TESTS = Map.of(
@@ -27,7 +27,7 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
 
     @Override
     public String dataIdForTest(String testName) {
-        return DATA_IDS_FOR_STANDARD_TESTS.get(testName);
+        return DATA_IDS_FOR_STANDARD_TESTS.get(StandardTest.valueOf(testName));
     }
 
     @Override
@@ -49,7 +49,7 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
 
     @Override
     public MyConnector getConnector() {
-        return myConnector;
+        return myConnectorMock;
     }
 
     /*
@@ -68,7 +68,7 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
     @Override
     public void baseConnectionOneTimeSetUp() {
         var connectionConfig = new MyConnectionConfigV1();
-        connectionConfig.setSamplePeriod("PT1S");
+        connectionConfig.setSamplePeriod("1s");
         connectionConfig.setTagCount(5);
         connectionConfig.setEnabled(true);
 
@@ -79,10 +79,8 @@ public class MyConnectorConditionStandardTest extends ConditionPullConnectionTes
             var mockConnectorService = mock(ConnectorServiceV2.class);
             when(mockConnectorService.loadConfig(any())).thenReturn(connectorConfig);
 
-            this.myConnector = new MyConnector();
-            this.myConnector.initialize(mockConnectorService);
-
-            myConnection = new MyConnection(this.myConnector, connectionConfig);
+            this.myConnectorMock = mock();
+            myConnection = new MyConnection(this.myConnectorMock, connectionConfig);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

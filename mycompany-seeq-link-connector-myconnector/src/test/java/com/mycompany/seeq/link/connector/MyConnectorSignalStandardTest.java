@@ -13,7 +13,7 @@ import com.seeq.link.sdk.testframework.SignalPullConnectionTestSuite;
 
 public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite<MyConnection, MyConnector,
         MyConnectionConfigV1, MyConnectorConfigV1> {
-    private MyConnector myConnector;
+    private MyConnector myConnectorMock;
     private MyConnection myConnection;
 
     private final Map<StandardTest, String> DATA_IDS_FOR_STANDARD_TESTS = Map.of(
@@ -44,7 +44,7 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
             return DATA_IDS_FOR_CUSTOM_TESTS.get(testName);
         }
 
-        return DATA_IDS_FOR_STANDARD_TESTS.get(testName);
+        return DATA_IDS_FOR_STANDARD_TESTS.get(StandardTest.valueOf(testName));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
 
     @Override
     public MyConnector getConnector() {
-        return myConnector;
+        return myConnectorMock;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
     @Override
     public void baseConnectionOneTimeSetUp() {
         var connectionConfig = new MyConnectionConfigV1();
-        connectionConfig.setSamplePeriod("PT1S");
+        connectionConfig.setSamplePeriod("1s");
         connectionConfig.setTagCount(5);
         connectionConfig.setEnabled(true);
 
@@ -103,11 +103,10 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
         try {
             var mockConnectorService = mock(ConnectorServiceV2.class);
             when(mockConnectorService.loadConfig(any())).thenReturn(connectorConfig);
+            when(mockConnectorService.log()).thenReturn(mock());
 
-            this.myConnector = new MyConnector();
-            this.myConnector.initialize(mockConnectorService);
-
-            myConnection = new MyConnection(this.myConnector, connectionConfig);
+            this.myConnectorMock = mock();
+            myConnection = new MyConnection(this.myConnectorMock, connectionConfig);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
