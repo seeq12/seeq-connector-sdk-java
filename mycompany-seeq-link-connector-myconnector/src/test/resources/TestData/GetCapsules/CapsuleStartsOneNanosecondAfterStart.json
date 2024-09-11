@@ -1,4 +1,4 @@
-﻿{
+{
   "Description": "This test checks correctness of queries that return a capsule that starts one nanosecond after StartTime",
   "GetCapsulesParameters": {
     "StartTime": "2024-07-31T23:59:59.999999999Z",

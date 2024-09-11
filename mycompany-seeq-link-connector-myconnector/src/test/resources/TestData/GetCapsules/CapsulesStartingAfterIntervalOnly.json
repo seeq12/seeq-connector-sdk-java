@@ -1,4 +1,4 @@
-﻿{
+{
   "Description": "This test checks correctness of queries where there are only capsules starting after the request interval",
   "GetCapsulesParameters": {
     "StartTime": "2024-08-01T00:00:00.600000Z",
