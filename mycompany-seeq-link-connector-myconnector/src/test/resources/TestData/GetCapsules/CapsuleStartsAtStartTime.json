@@ -10,7 +10,7 @@
   "ExpectedCapsules": [
     {
       "IsoTimestampStart": "2024-08-01T00:00:00.000000Z",
-      "IsoTimestampEnd": "2024-08-01T00:00:00.000010Z",
+      "IsoTimestampEnd": "2024-08-01T00:00:00.010000Z",
       "Properties": [
         {
           "Name": "Intensity",
@@ -20,7 +20,7 @@
     },
     {
       "IsoTimestampStart": "2024-08-01T00:00:01.000000Z",
-      "IsoTimestampEnd": "2024-08-01T00:00:01.000010Z",
+      "IsoTimestampEnd": "2024-08-01T00:00:01.010000Z",
       "Properties": [
         {
           "Name": "Intensity",
