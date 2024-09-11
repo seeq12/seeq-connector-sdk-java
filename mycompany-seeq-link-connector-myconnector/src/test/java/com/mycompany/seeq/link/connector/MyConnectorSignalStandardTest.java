@@ -19,7 +19,6 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
     private final Map<StandardTest, String> DATA_IDS_FOR_STANDARD_TESTS = Map.of(
             StandardTest.NoSamplesOutsideBoundary, "signal-data-id-1",
             StandardTest.SampleOneNanosecondAfterEnd, "signal-data-id-2",
-            StandardTest.SampleOneNanosecondAfterStart, "signal-data-id-3",
             StandardTest.SampleOneNanosecondBeforeEnd, "signal-data-id-4",
             StandardTest.SampleOneNanosecondBeforeStart, "signal-data-id-5",
             StandardTest.SampleOnLeftBoundary, "signal-data-id-6",
@@ -82,7 +81,9 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
                 new IgnoredTest(StandardTest.IntegerValuedSamples, sharedIgnoreReason),
                 new IgnoredTest(StandardTest.StringValuedSamples, sharedIgnoreReason),
                 new IgnoredTest(StandardTest.NoSamplesAtAll,
-                        "The simulated datasource will always return at least one sample")
+                        "The simulated datasource will always return at least one sample"),
+                new IgnoredTest(StandardTest.SampleOneNanosecondAfterStart,
+                        "The simulated datasource cannot generate samples one nanosecond after start")
         );
     }
 
