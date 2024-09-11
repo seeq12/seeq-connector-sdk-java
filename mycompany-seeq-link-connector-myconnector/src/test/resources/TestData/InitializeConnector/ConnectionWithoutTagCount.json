@@ -1,7 +1,7 @@
 {
   "Description": "This test checks that the connector can be initialized without a tag count",
   "ConnectorConfiguration": {
-    "Version": "MyCompany.Seeq.Link.Connector.MyConnectorConfigV1",
+    "Version": "com.mycompany.seeq.link.connector.MyConnectorConfigV1",
     "Connections": [
       {
         "Name": "Connection One",
@@ -22,13 +22,13 @@
     ]
   },
   "Valid": true,
-  "ConnectorConfigurationClass": "MyCompany.Seeq.Link.Connector.MyConnectorConfigV1",
+  "ConnectorConfigurationClass": "com.mycompany.seeq.link.connector.MyConnectorConfigV1",
   "ConnectionSpecs": [
     {
       "Name": "Connection One",
       "Valid": true,
       "Enabled": true,
-      "ConnectionConfigurationClass": "MyCompany.Seeq.Link.Connector.MyConnectionConfigV1"
+      "ConnectionConfigurationClass": "com.mycompany.seeq.link.connector.MyConnectionConfigV1"
     }
   ]
 }
