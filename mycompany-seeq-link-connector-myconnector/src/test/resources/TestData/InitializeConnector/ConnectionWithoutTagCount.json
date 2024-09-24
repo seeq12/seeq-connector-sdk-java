@@ -17,7 +17,7 @@
         "MaxResultsPerRequest": null,
         "IncrementalIndexingFrequency": "1h",
         "TagCount": null,
-        "SamplePeriod": "00:00:01"
+        "SamplePeriod": "1s"
       }
     ]
   },

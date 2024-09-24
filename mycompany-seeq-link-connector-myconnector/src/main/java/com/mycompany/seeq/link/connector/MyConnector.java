@@ -68,18 +68,10 @@ public class MyConnector implements ConnectorV2 {
                 continue;
             }
 
-            boolean samplePeriodValid;
-            try {
-                Duration.parse(connectionConfig.getSamplePeriod());
-                samplePeriodValid = true;
-            } catch (DateTimeParseException ex) {
-                samplePeriodValid = false;
-            }
-
             // do further validation of the connection configuration to ensure only property configured connections
             // are processed. In our case, we need a valid SamplePeriod,and if a TagCount is provided, it must be a
             // positive integer.
-            if (!samplePeriodValid) {
+            if (connectionConfig.getSamplePeriod() == null || connectionConfig.getSamplePeriod().isEmpty()) {
                 // provide details of the invalid configuration so it can be addressed
                 this.connectorService.log().warn("Connection '{}' has an invalid SamplePeriod. It will be ignored.",
                         connectionConfig.getName());
@@ -90,7 +82,7 @@ public class MyConnector implements ConnectorV2 {
                 continue;
             }
 
-            if (connectionConfig.getTagCount() != null && connectionConfig.getTagCount() < 1) {
+            if (connectionConfig.getTagCount() < 0) {
                 this.connectorService.log().warn("Connection '{}' has an invalid TagCount. It will be ignored.",
                         connectionConfig.getName());
                 connectionConfig.setEnabled(false);
