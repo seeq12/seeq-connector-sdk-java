@@ -68,9 +68,9 @@ public class MyConnector implements ConnectorV2 {
                 continue;
             }
 
-            // do further validation of the connection configuration to ensure only property configured connections
-            // are processed. In our case, we need a valid SamplePeriod,and if a TagCount is provided, it must be a
-            // positive integer.
+            // do further validation of the connection configuration to ensure only properly configured connections
+            // are processed. In our case, we need a valid SamplePeriod, and if a TagCount is provided, it must not be
+            // a negative value.
             if (connectionConfig.getSamplePeriod() == null || connectionConfig.getSamplePeriod().isEmpty()) {
                 // provide details of the invalid configuration so it can be addressed
                 this.connectorService.log().warn("Connection '{}' has an invalid SamplePeriod. It will be ignored.",
