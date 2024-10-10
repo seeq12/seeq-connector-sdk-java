@@ -13,7 +13,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testImplementation("org.assertj:assertj-core:3.19.0")
-    testImplementation(testFixtures("com.seeq.link:seeq-link-sdk:66.0.0-v202407310200"))
+    testImplementation(testFixtures("com.seeq.link:seeq-link-sdk:66.0.0-v202409241536-SNAPSHOT"))
 }
 
 tasks {
