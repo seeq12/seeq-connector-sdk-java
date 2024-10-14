@@ -241,8 +241,7 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // Streams.stream(iterable), Java's Stream.of(T... values), or Collection.stream().
         //
         // The code within this function is largely specific to the simulator example. But it should give you an
-        // idea of
-        // some of the concerns you'll need to attend to.
+        // idea of some of the concerns you'll need to attend to.
         return events.map(event -> {
                     TimeInstant start = new TimeInstant(event.getStart());
                     TimeInstant end = new TimeInstant(event.getEnd());

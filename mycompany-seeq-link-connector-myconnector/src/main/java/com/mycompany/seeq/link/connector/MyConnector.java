@@ -1,5 +1,7 @@
 package com.mycompany.seeq.link.connector;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.UUID;
 
 import com.seeq.link.sdk.ConfigObject;
@@ -59,6 +61,32 @@ public class MyConnector implements ConnectorV2 {
                 // If the ID is null, then the user likely copy/pasted an existing connection configuration and
                 // removed the ID so that a new one would be generated. Generate the new one!
                 connectionConfig.setId(UUID.randomUUID().toString());
+            }
+
+            if (!connectionConfig.isEnabled()) {
+                // If the connection is not enabled, then do not add it to the list of connections
+                continue;
+            }
+
+            // do further validation of the connection configuration to ensure only properly configured connections
+            // are processed. In our case, we need a valid SamplePeriod, and if a TagCount is provided, it must not be
+            // a negative value.
+            if (connectionConfig.getSamplePeriod() == null || connectionConfig.getSamplePeriod().isEmpty()) {
+                // provide details of the invalid configuration so it can be addressed
+                this.connectorService.log().warn("Connection '{}' has an invalid SamplePeriod. It will be ignored.",
+                        connectionConfig.getName());
+
+                // you can also disable the connection so it is no longer processed until changes are made
+                connectionConfig.setEnabled(false);
+
+                continue;
+            }
+
+            if (connectionConfig.getTagCount() < 0) {
+                this.connectorService.log().warn("Connection '{}' has an invalid TagCount. It will be ignored.",
+                        connectionConfig.getName());
+                connectionConfig.setEnabled(false);
+                continue;
             }
 
             this.connectorService.addConnection(new MyConnection(this, connectionConfig));

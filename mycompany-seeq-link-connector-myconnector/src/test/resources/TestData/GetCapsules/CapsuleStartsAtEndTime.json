@@ -1,0 +1,32 @@
+{
+  "Description": "This test checks correctness of queries where there are no capsules that start in [StartTime, EndTime) but there is a capsule starting at EndTime",
+  "GetCapsulesParameters": {
+    "StartTime": "2024-08-01T00:00:00.000000Z",
+    "EndTime": "2024-08-01T00:00:01.000000Z",
+    "MaxDurationNanos": 3600000000000,
+    "CapsuleLimit": 1000
+  },
+  "StrictPropertyChecking": false,
+  "ExpectedCapsules": [
+    {
+      "IsoTimestampStart": "2024-08-01T00:00:00.000000Z",
+      "IsoTimestampEnd": "2024-08-01T00:00:00.010000Z",
+      "Properties": [
+        {
+          "Name": "Intensity",
+          "UnitOfMeasure": "rads"
+        }
+      ]
+    },
+    {
+      "IsoTimestampStart": "2024-08-01T00:00:01.000000Z",
+      "IsoTimestampEnd": "2024-08-01T00:00:01.010000Z",
+      "Properties": [
+        {
+          "Name": "Intensity",
+          "UnitOfMeasure": "rads"
+        }
+      ]
+    }
+  ]
+}

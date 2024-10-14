@@ -1,0 +1,22 @@
+{
+  "Description": "This test checks correctness of queries that return a capsule that starts one nanosecond after StartTime",
+  "GetCapsulesParameters": {
+    "StartTime": "2024-07-31T23:59:59.999999999Z",
+    "EndTime": "2024-08-01T00:00:00.300000Z",
+    "MaxDurationNanos": 3600000000000,
+    "CapsuleLimit": 1000
+  },
+  "StrictPropertyChecking": false,
+  "ExpectedCapsules": [
+    {
+      "IsoTimestampStart": "2024-08-01T00:00:00.000000Z",
+      "IsoTimestampEnd": "2024-08-01T00:00:00.010000Z",
+      "Properties": [
+        {
+          "Name": "Intensity",
+          "UnitOfMeasure": "rads"
+        }
+      ]
+    }
+  ]
+}
