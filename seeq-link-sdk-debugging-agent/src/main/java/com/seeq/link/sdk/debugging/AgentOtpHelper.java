@@ -1,10 +1,10 @@
 package com.seeq.link.sdk.debugging;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import com.seeq.link.sdk.services.DefaultFileBasedSecretsManager;
 import com.seeq.link.sdk.utilities.AgentHelper;
@@ -12,7 +12,9 @@ import com.seeq.utilities.SeeqNames;
 
 public class AgentOtpHelper {
     private static final String AGENT_ONE_TIME_PASSWORD_PLACEHOLDER = "<your_agent_one_time_password>";
-    private static final Path OtpFilePath = Paths.get("data", "keys", "agent.otp");
+    private static final Path OtpFilePath =
+            Path.of(new File(Main.class.getClassLoader().getResource("data/").getPath()).getAbsolutePath())
+                    .resolve("keys").resolve("agent.otp");
 
     public static void setupAgentOtp(Path seeqDataFolder, String agentName) {
         if (isAgentOneTimePasswordSet()) {
@@ -39,7 +41,7 @@ public class AgentOtpHelper {
 
     private static boolean isAgentOneTimePasswordSet() {
         String fileContents = readAgentOneTimePassword();
-        return AGENT_ONE_TIME_PASSWORD_PLACEHOLDER.equals(fileContents);
+        return !AGENT_ONE_TIME_PASSWORD_PLACEHOLDER.equals(fileContents);
     }
 
     private static String readAgentOneTimePassword() {
