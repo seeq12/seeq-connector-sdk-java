@@ -21,10 +21,16 @@ public class Main {
     public static void main(String[] args) {
         Program.Configuration config = Program.getDefaultConfiguration();
 
+        final String agentName = "Java Connector SDK Debugging Agent";
+        // Ensure you set the agent one-time password in /main/resources/data/keys
+        Path seeqDataFolder = getSeeqDataFolder();
+
+        AgentOtpHelper.setupAgentOtp(seeqDataFolder, agentName);
+
         String seeqUrl = "https://yourserver.seeq.host";
 
         // Provide a name for the agent that differentiates it from the "normal" JVM Agent
-        config.setName("Java Connector SDK Debugging Agent");
+        config.setName(agentName);
 
         // This configures the agent to run as a remote rather than local agent (seeq on a different machine)
         config.setRemoteAgent(true);
@@ -35,10 +41,7 @@ public class Main {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-
-        // Ensure you set the agent api key in /main/resources/data/keys
-        Path dataFolder = getSeeqDataFolder();
-        config.setDataFolder(dataFolder);
+        config.setDataFolder(seeqDataFolder);
 
         // Set the connectorSearchPaths to only find connectors within the connector-sdk folder
         Path executingAssemblyLocation;
@@ -58,7 +61,7 @@ public class Main {
         new Program().run(new com.seeq.link.agent.ClassFactory(), new ClassFactory(), config);
     }
 
-    private static Path getSeeqDataFolder(){
+    private static Path getSeeqDataFolder() {
         URL resource = Main.class.getClassLoader().getResource("data/");
         assert resource != null;
         File file = new File(resource.getPath());
