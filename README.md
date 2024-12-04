@@ -35,14 +35,14 @@ connector. You can use the free IntelliJ IDEA Community Edition.
 
 Import the project into IntelliJ IDEA by taking the following steps:
 
-1. At the IntelliJ launch screen, select *Open or import*. If you're already in an IntelliJ project, select *File* > *
-   Open*.
-2. Browse to the extracted *seeq-connector-sdk/java* folder.
+1. At the IntelliJ launch screen, select *Open or import*. If you're already in an IntelliJ project, select *File* > 
+   *Open*.
+2. Browse to the extracted *seeq-connector-sdk-java* folder.
 3. Click OK.
 
-On the left-hand side of the screen, you will see a *Project* tab and there will be a bolded *java [seeq-connector-sdk]*
-folder at the top level. There should be a small light-blue square in the bottom-right of the folder icon, which
-indicates that it was recognized as a Gradle project.
+On the left-hand side of the screen, you will see a *Project* tab and there will be a seeq-connector-sdk-java 
+**[seeq-connector-sdk]** folder at the top level. There should be a small light-blue square in the bottom-right of the 
+folder icon, which indicates that it was recognized as a Gradle project.
 
 The *Build* tab at the bottom should eventually print `BUILD SUCCESSFUL` to indicate that the Gradle project was built
 correctly.
@@ -55,11 +55,11 @@ Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
-1. Retrieve the agent_api_key from your Seeq Server by logging in as a Seeq Administrator and navigating to the API
-   Documentation page. Expand the System group and expand GET /system/agentKey. Click Execute
-1. Modify the `agent_api_key` in `resources\data\keys\agent.key` my replacing the `<your_agent_api_key>`
-   with the key that is located in the top response from the previous step. Note: it should only include the value. For
-   example if the return was `{"agentKey": "superSecret123"}` then the key is `superSecret123`
+1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
+1. Click the +Add Agent button and, in the prompt, provide only the Machine Name where the agent will be running. Click 
+   Save and record the displayed One-Time Password value for use in the next step.
+1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
+   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
 1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
    right-click on
