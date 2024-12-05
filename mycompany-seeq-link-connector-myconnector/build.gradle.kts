@@ -6,6 +6,9 @@ plugins {
 group = "com.mycompany.seeq.link.connector"
 version = "0.1.0-SNAPSHOT"
 
+project.version = "1.0.0.0"
+val minimumSeeqLinkSdkVersion = "100.0.0.0"
+
 dependencies {
     compileOnly("com.seeq.link:seeq-link-sdk:66.0.0-v202410141803")
 
@@ -24,6 +27,13 @@ tasks {
                 manifest.attributes["Class-Path"] = files.joinToString(" ") { "lib/${it.name}" }
             }
         }
+    }
+
+    withType<Jar>().configureEach {
+        manifest.attributes(
+            "Version" to project.version,
+            "Minimum-Seeq-Link-SDK-VERSION" to minimumSeeqLinkSdkVersion
+        )
     }
 
     test {
