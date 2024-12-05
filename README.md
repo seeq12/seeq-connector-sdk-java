@@ -54,21 +54,24 @@ popup for setting the JDK home directory, select the `java` directory you just i
 Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
-1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
+1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server. This URL 
+   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a specific 
+   port for the connection if the server is not using the standard 80/443 configuration for http/https. Do this by 
+   appending it to the end following a colon. E.g. `http://test.server:12345`
 1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
-1. Click the +Add Agent button and, in the prompt, provide only the Machine Name where the agent will be running. Click 
-   Save and record the displayed One-Time Password value for use in the next step.
+1. Click the +Add Agent button and, in the prompt, provide the Machine Name where the agent will be running and in the 
+   Agent Name field enter "Java Connector SDK Debugging Agent". Click Save and record the displayed One-Time Password 
+   value for use in the next step.
 1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
    `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
-1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
-   right-click on
+1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
    *seeq-connector-sdk > seeq-link-sdk-debugging-agent > Tasks > application > run* and select *Debug*.
 1. You should hit the breakpoint you set. **This verifies that your IDE built your project correctly and can connect its
    debugger to it.**
-1. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java
-   ` file in the
-   `mycompany-seeq-link-connector-myconnector` and put a breakpoint on the first line of the `initialize()` function.
+1. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java` 
+   file in the `mycompany-seeq-link-connector-myconnector` and put a breakpoint on the first line of the `initialize()` 
+   function.
 1. Resume execution (*Run > Debugging Actions > Resume Program*). You should hit the next breakpoint. **This verifies
    that the debugging agent can load the template connector correctly.**
 1. Resume execution.
