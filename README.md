@@ -102,10 +102,10 @@ your Connector. The value specified here will appear in the Administration page 
 determine what version is deployed to each Agent and whether an upgrade of the Connector is necessary. 
 
 The `build.gradle.kts` file also allows you to declare a Minimum Seeq Link SDK Version value `minimumSeeqLinkSdkVersion`.
-This value will help enforce compatibility between your Connector and any Agent where it is deployed. Agents will 
-declare the version of the Seeq Link SDK that they provide and, by specifying the minimum version of the Seeq Link SDK 
-that provides the necessary features for your Connector, they will be able to check that they satisfy the Connector's 
-requirement when loading it.  
+This value will help enforce compatibility between your Connector and any Agent where it is deployed. Agent versions 
+exactly match the version number of the Seeq Link SDK they provide and, by specifying the minimum version of the Seeq 
+Link SDK that provides the necessary features for your Connector, they will be able to check that they satisfy the 
+Connector's requirement when loading it.  
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
