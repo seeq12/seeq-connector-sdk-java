@@ -1,5 +1,5 @@
-Overview
-========
+# Overview
+
 Welcome to the Seeq Connector SDK for Java!
 
 This SDK is intended for developers that wish to write a Seeq datasource connector that can be loaded by a Seeq agent
@@ -10,8 +10,7 @@ Connectors. Java development can occur on Windows, OSX or Ubuntu operating syste
 
 It is recommended that you initially test with a "test" version of your Seeq Remote Agent. This will seperate your production connections from your test connections, allowing you to restart the remote agent without impacting users. This repository contains an embedded remote agent that allows your development environment to interactively debug your connector. 
 
-Environment Setup
-=================
+# Environment Setup
 
 ## The Build Environment
 
@@ -57,9 +56,12 @@ Take the following steps to verify your debugging setup:
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
 1. Retrieve the agent_api_key from your Seeq Server by logging in as a Seeq Administrator and navigating to the API
    Documentation page. Expand the System group and expand GET /system/agentKey. Click Execute
-1. Modify the `agent_api_key` in `resources\data\keys\agent.key` my replacing the `<your_agent_api_key>`
-   with the key that is located in the top response from the previous step. Note: it should only include the value. For
-   example if the return was `{"agentKey": "superSecret123"}` then the key is `superSecret123`
+1. Pre-provision this agent on your Seeq server by logging in as a Seeq Administrator and navigating to the Agents tab
+   on the Administration page. Click the "Add Agent" button and fill the presented fields. Provide the machine name and
+   "**Java Connector SDK Debugging Agent**" as the agent name. Click "Add Agent". Wait for pre-provisioning to complete.
+   Copy the displayed one-time password.
+1. Replace `<your_agent_one_time_password>` in the `agent.otp` file in the resources/data/keys/ directory of the 
+   `seeq-link-sdk-debugging-agent` project with the one-time password you copied from the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
 1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
    right-click on
@@ -96,7 +98,7 @@ You can add additional dependencies in the `build.gradle.kts` file in your conne
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
-`DatasourceSimulator`. You'll know you've removed all of the template-specific code when you can delete this file from
+`DatasourceSimulator`. You'll know you've removed all the template-specific code when you can delete this file from
 the project and still build without errors.
 
 Any log messages you create using the `log()` method on `ConnectorServiceV2` and `DatasourceConnectionServiceV2` will go

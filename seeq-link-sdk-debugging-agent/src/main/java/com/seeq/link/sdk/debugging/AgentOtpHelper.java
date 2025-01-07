@@ -14,6 +14,8 @@ public class AgentOtpHelper {
     private static final String AGENT_ONE_TIME_PASSWORD_PLACEHOLDER = "<your_agent_one_time_password>";
     private static final Path OtpFilePath =
             Path.of(new File(Main.class.getClassLoader().getResource("data/").getPath()).getAbsolutePath())
+                    .getParent().getParent().getParent().getParent()
+                    .resolve("src").resolve("main").resolve("resources").resolve("data")
                     .resolve("keys").resolve("agent.otp");
 
     public static void setupAgentOtp(Path seeqDataFolder, String agentName) {
