@@ -1,5 +1,5 @@
-Overview
-========
+# Overview
+
 Welcome to the Seeq Connector SDK for Java!
 
 This SDK is intended for developers that wish to write a Seeq datasource connector that can be loaded by a Seeq agent
@@ -10,8 +10,7 @@ Connectors. Java development can occur on Windows, OSX or Ubuntu operating syste
 
 It is recommended that you initially test with a "test" version of your Seeq Remote Agent. This will seperate your production connections from your test connections, allowing you to restart the remote agent without impacting users. This repository contains an embedded remote agent that allows your development environment to interactively debug your connector. 
 
-Environment Setup
-=================
+# Environment Setup
 
 ## The Build Environment
 
@@ -109,7 +108,7 @@ Connector's requirement when loading it.
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
-`DatasourceSimulator`. You'll know you've removed all of the template-specific code when you can delete this file from
+`DatasourceSimulator`. You'll know you've removed all the template-specific code when you can delete this file from
 the project and still build without errors.
 
 Any log messages you create using the `log()` method on `ConnectorServiceV2` and `DatasourceConnectionServiceV2` will go
