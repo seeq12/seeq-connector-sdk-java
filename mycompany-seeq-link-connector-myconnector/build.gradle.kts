@@ -7,7 +7,7 @@ group = "com.mycompany.seeq.link.connector"
 version = "0.1.0-SNAPSHOT"
 
 project.version = "1.0.0.0"
-val minimumSeeqLinkSdkVersion = "100.0.0.0"
+val minimumSeeqLinkSdkVersion = "100.3.349"
 
 dependencies {
     compileOnly("com.seeq.link:seeq-link-sdk:100.3.349")

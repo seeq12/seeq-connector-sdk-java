@@ -58,9 +58,9 @@ Take the following steps to verify your debugging setup:
    port for the connection if the server is not using the standard 80/443 configuration for http/https. Do this by 
    appending it to the end following a colon. E.g. `http://test.server:12345`
 1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
-1. Click the +Add Agent button and, in the prompt, provide the Machine Name where the agent will be running and in the 
-   Agent Name field enter "Java Connector SDK Debugging Agent". Click Save and record the displayed One-Time Password 
-   value for use in the next step.
+1. Click the +Add Agent button and, in the prompt, provide the hostname of the machine where the development agent will 
+   run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter "Java Connector SDK 
+   Debugging Agent". Click Save and record the displayed One-Time Password value for use in the next step.
 1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
    `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
