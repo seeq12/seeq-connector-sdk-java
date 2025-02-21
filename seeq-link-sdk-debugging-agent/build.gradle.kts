@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.seeq.link:seeq-link-agent:100.3.349")
+    implementation("com.seeq.link:seeq-link-agent:${project.properties["seeqLinkSDKVersion"]}")
 }
 
 application {
