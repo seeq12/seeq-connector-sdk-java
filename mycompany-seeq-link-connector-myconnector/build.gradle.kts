@@ -6,7 +6,7 @@ plugins {
 group = "com.mycompany.seeq.link.connector"
 version = "0.1.0-SNAPSHOT"
 
-project.version = "1.0.0.0"
+project.version = "1.0.0"
 
 dependencies {
     compileOnly("com.seeq.link:seeq-link-sdk:${project.properties["seeqLinkSDKVersion"]}")
@@ -30,7 +30,7 @@ tasks {
     withType<Jar>().configureEach {
         manifest.attributes(
             "Version" to project.version,
-            "Minimum-Seeq-Link-SDK-VERSION" to "${project.properties["seeqLinkSDKVersion"]}"
+            "Minimum-Seeq-Link-SDK-Version" to "${project.properties["seeqLinkSDKVersion"]}"
         )
     }
 

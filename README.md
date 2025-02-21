@@ -59,8 +59,11 @@ Take the following steps to verify your debugging setup:
    appending it to the end following a colon. E.g. `http://test.server:12345`
 1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
 1. Click the +Add Agent button and, in the prompt, provide the hostname of the machine where the development agent will 
-   run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter "Java Connector SDK 
-   Debugging Agent". Click Save and record the displayed One-Time Password value for use in the next step.
+   run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter 
+
+   `Java Connector SDK Debugging Agent`
+
+   Click Save and record the displayed One-Time Password value for use in the next step.
 1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
    `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
@@ -100,11 +103,13 @@ The `build.gradle.kts` file provides the `project.version` variable which can be
 your Connector. The value specified here will appear in the Administration page of the Seeq Server and can help you 
 determine what version is deployed to each Agent and whether an upgrade of the Connector is necessary. 
 
-The `build.gradle.kts` file also allows you to declare a Minimum Seeq Link SDK Version value `minimumSeeqLinkSdkVersion`.
+The `gradle.properties` file allows you to declare a Minimum Seeq Link SDK Version value with `seeqLinkSDKVersion`.
 This value will help enforce compatibility between your Connector and any Agent where it is deployed. Agent versions 
-exactly match the version number of the Seeq Link SDK they provide and, by specifying the minimum version of the Seeq 
-Link SDK that provides the necessary features for your Connector, they will be able to check that they satisfy the 
-Connector's requirement when loading it.  
+exactly match the version number of the Seeq Link SDK they provide. By specifying the minimum version of the Seeq 
+Link SDK that provides the necessary features for your Connector, any Agent that attempts to load your Connector will 
+be able to check that it satisfies your Connector's requirements. This property is referenced in both the Connector and 
+the provided debugging Agent's `build.gradle.kts` files. Available versions of the Seeq Link SDK can be found in the 
+Mavent repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
