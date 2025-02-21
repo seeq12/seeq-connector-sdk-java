@@ -6,14 +6,15 @@ plugins {
 group = "com.mycompany.seeq.link.connector"
 version = "0.1.0-SNAPSHOT"
 
-dependencies {
-    compileOnly("com.seeq.link:seeq-link-sdk:66.0.0-v202410141803")
+project.version = "1.0.0"
 
-    testImplementation("com.seeq.link:seeq-link-sdk:66.0.0-v202410141803")
+dependencies {
+    compileOnly("com.seeq.link:seeq-link-sdk:${project.properties["seeqLinkSDKVersion"]}")
+    testImplementation("com.seeq.link:seeq-link-sdk:${project.properties["seeqLinkSDKVersion"]}")
     testImplementation("org.mockito:mockito-core:4.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testImplementation("org.assertj:assertj-core:3.19.0")
-    testImplementation(testFixtures("com.seeq.link:seeq-link-sdk:66.0.0-v202410141803"))
+    testImplementation(testFixtures("com.seeq.link:seeq-link-sdk:${project.properties["seeqLinkSDKVersion"]}"))
 }
 
 tasks {
@@ -24,6 +25,13 @@ tasks {
                 manifest.attributes["Class-Path"] = files.joinToString(" ") { "lib/${it.name}" }
             }
         }
+    }
+
+    withType<Jar>().configureEach {
+        manifest.attributes(
+            "Version" to project.version,
+            "Minimum-Seeq-Link-SDK-Version" to "${project.properties["seeqLinkSDKVersion"]}"
+        )
     }
 
     test {

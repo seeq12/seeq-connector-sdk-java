@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation("com.seeq.link:seeq-link-agent:66.0.0-v202407310200")
+    // Note: The version of the Seeq Link Agent is always set to the same version as the Seeq Link SDK it provides
+    implementation("com.seeq.link:seeq-link-agent:${project.properties["seeqLinkSDKVersion"]}")
 }
 
 application {

@@ -80,6 +80,7 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
                 new IgnoredTest(StandardTest.EnumerationValuedSamples, sharedIgnoreReason),
                 new IgnoredTest(StandardTest.IntegerValuedSamples, sharedIgnoreReason),
                 new IgnoredTest(StandardTest.StringValuedSamples, sharedIgnoreReason),
+                new IgnoredTest(StandardTest.MultivaluedSamples, "The simulated datasource does not support multivalue samples"),
                 new IgnoredTest(StandardTest.NoSamplesAtAll,
                         "The simulated datasource will always return at least one sample"),
                 new IgnoredTest(StandardTest.SampleOneNanosecondAfterStart,

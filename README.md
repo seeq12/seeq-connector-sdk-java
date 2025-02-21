@@ -34,14 +34,14 @@ connector. You can use the free IntelliJ IDEA Community Edition.
 
 Import the project into IntelliJ IDEA by taking the following steps:
 
-1. At the IntelliJ launch screen, select *Open or import*. If you're already in an IntelliJ project, select *File* > *
-   Open*.
-2. Browse to the extracted *seeq-connector-sdk/java* folder.
+1. At the IntelliJ launch screen, select *Open or import*. If you're already in an IntelliJ project, select *File* > 
+   *Open*.
+2. Browse to the extracted *seeq-connector-sdk-java* folder.
 3. Click OK.
 
-On the left-hand side of the screen, you will see a *Project* tab and there will be a bolded *java [seeq-connector-sdk]*
-folder at the top level. There should be a small light-blue square in the bottom-right of the folder icon, which
-indicates that it was recognized as a Gradle project.
+On the left-hand side of the screen, you will see a *Project* tab and there will be a seeq-connector-sdk-java 
+**[seeq-connector-sdk]** folder at the top level. There should be a small light-blue square in the bottom-right of the 
+folder icon, which indicates that it was recognized as a Gradle project.
 
 The *Build* tab at the bottom should eventually print `BUILD SUCCESSFUL` to indicate that the Gradle project was built
 correctly.
@@ -53,24 +53,27 @@ popup for setting the JDK home directory, select the `java` directory you just i
 Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
-1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server
-1. Retrieve the agent_api_key from your Seeq Server by logging in as a Seeq Administrator and navigating to the API
-   Documentation page. Expand the System group and expand GET /system/agentKey. Click Execute
-1. Pre-provision this agent on your Seeq server by logging in as a Seeq Administrator and navigating to the Agents tab
-   on the Administration page. Click the "Add Agent" button and fill the presented fields. Provide the machine name and
-   "**Java Connector SDK Debugging Agent**" as the agent name. Click "Add Agent". Wait for pre-provisioning to complete.
-   Copy the displayed one-time password.
-1. Replace `<your_agent_one_time_password>` in the `agent.otp` file in the resources/data/keys/ directory of the 
-   `seeq-link-sdk-debugging-agent` project with the one-time password you copied from the previous step. 
+1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server. This URL 
+   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a specific 
+   port for the connection if the server is not using the standard 80/443 configuration for http/https. Do this by 
+   appending it to the end following a colon. E.g. `http://test.server:12345`
+1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
+1. Click the +Add Agent button and, in the prompt, provide the hostname of the machine where the development agent will 
+   run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter 
+
+   `Java Connector SDK Debugging Agent`
+
+   Click Save and record the displayed One-Time Password value for use in the next step.
+1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
+   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
-1. On the right-hand edge of IntelliJ there is a *Gradle* tab. Click on that tab to open the Gradle tool window, then
-   right-click on
+1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
    *seeq-connector-sdk > seeq-link-sdk-debugging-agent > Tasks > application > run* and select *Debug*.
 1. You should hit the breakpoint you set. **This verifies that your IDE built your project correctly and can connect its
    debugger to it.**
-1. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java
-   ` file in the
-   `mycompany-seeq-link-connector-myconnector` and put a breakpoint on the first line of the `initialize()` function.
+1. With execution paused at the breakpoint, open the `src/main/java/com/mycompany/seeq/link/connector/MyConnector.java` 
+   file in the `mycompany-seeq-link-connector-myconnector` and put a breakpoint on the first line of the `initialize()` 
+   function.
 1. Resume execution (*Run > Debugging Actions > Resume Program*). You should hit the next breakpoint. **This verifies
    that the debugging agent can load the template connector correctly.**
 1. Resume execution.
@@ -95,6 +98,18 @@ Connectors are discovered at runtime using Java's `ServiceLoader` mechanism. You
 correct class name. If you use rename refactoring in your IDE, it should update this file automatically.
 
 You can add additional dependencies in the `build.gradle.kts` file in your connector's folder.
+
+The `build.gradle.kts` file provides the `project.version` variable which can be used to maintain semantic versioning in 
+your Connector. The value specified here will appear in the Administration page of the Seeq Server and can help you 
+determine what version is deployed to each Agent and whether an upgrade of the Connector is necessary. 
+
+The `gradle.properties` file allows you to declare a Minimum Seeq Link SDK Version value with `seeqLinkSDKVersion`.
+This value will help enforce compatibility between your Connector and any Agent where it is deployed. Agent versions 
+exactly match the version number of the Seeq Link SDK they provide. By specifying the minimum version of the Seeq 
+Link SDK that provides the necessary features for your Connector, any Agent that attempts to load your Connector will 
+be able to check that it satisfies your Connector's requirements. This property is referenced in both the Connector and 
+the provided debugging Agent's `build.gradle.kts` files. Available versions of the Seeq Link SDK can be found in the 
+Mavent repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
