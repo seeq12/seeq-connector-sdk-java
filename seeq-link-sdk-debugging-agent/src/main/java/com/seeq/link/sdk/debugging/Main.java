@@ -54,7 +54,7 @@ public class Main {
         }
 
         Path connectorSdkRoot = executingAssemblyLocation.getParent().getParent().getParent().getParent().getParent();
-        String searchPath = connectorSdkRoot.toString() + "/*connector*/build/libs/*connector*.jar";
+        String searchPath = connectorSdkRoot.toString() + "/*connector*/build/install/*connector*/*connector*.jar";
 
         config.setConnectorSearchPaths(searchPath);
 
