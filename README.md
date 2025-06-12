@@ -87,8 +87,9 @@ Take the following steps to verify your debugging setup:
 Now you're ready to start development!
 
 ### Note: ###
-The setup process described above creates a seeq-link-sdk-debugging-agent/build/resources/main/data/agent-keys/agent.
-keys file, where the debugging agent stores its authentication keys.
+The setup process described above creates a 
+seeq-link-sdk-debugging-agent/build/resources/main/data/agent-keys/agent.keys file, where the debugging agent stores 
+its authentication keys.
 
 As long as you don’t delete this file, the debugging agent will remain authenticated, and there is no need to modify 
 src/resources/data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process.
