@@ -96,7 +96,6 @@ public class MyConnectorSignalStandardTest extends SignalPullConnectionTestSuite
     public void baseConnectionOneTimeSetUp() {
         var connectionConfig = new MyConnectionConfigV1();
         connectionConfig.setSamplePeriod("1s");
-        connectionConfig.setTagCount(5);
         connectionConfig.setEnabled(true);
 
         var connectorConfig = new MyConnectorConfigV1();
