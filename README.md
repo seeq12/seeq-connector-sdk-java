@@ -64,7 +64,7 @@ Take the following steps to verify your debugging setup:
    `Java Connector SDK Debugging Agent`
 
    Click Save and record the displayed One-Time Password value for use in the next step.
-1. Modify the `src\resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
+1. Modify the `data/keys/agent.otp` file in the `seeq-connector-sdk` root project, replacing 
    `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
 1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
@@ -78,7 +78,7 @@ Take the following steps to verify your debugging setup:
    that the debugging agent can load the template connector correctly.**
 1. Resume execution.
 1. Bring up Seeq Workbench and click on the connections section at the top of the screen. You should
-   see `My Connector Type: My First Connection` in the list of connections, with 5000 items indexed.
+   see `My Connector Type: My First Connection` in the list of connections, with a few items indexed.
 1. In Seeq Workbench's *Data* tab, search for `simulated`.
 1. A list of simulated signals should appear in the results. Click on any of the results.
 1. The signal should be added to the *Details* pane and a repeating waveform should be shown in the trend. **This
@@ -87,12 +87,11 @@ Take the following steps to verify your debugging setup:
 Now you're ready to start development!
 
 ### Note: ###
-The setup process described above creates a 
-seeq-link-sdk-debugging-agent/build/resources/main/data/agent-keys/agent.keys file, where the debugging agent stores 
-its authentication keys.
+The setup process described above creates a data/agent-keys/agent.keys file, where the debugging agent stores its 
+authentication keys.
 
 As long as you don’t delete this file, the debugging agent will remain authenticated, and there is no need to modify 
-src/resources/data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process.
+data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process.
 
 ## Developing your Connector
 
@@ -117,7 +116,7 @@ exactly match the version number of the Seeq Link SDK they provide. By specifyin
 Link SDK that provides the necessary features for your Connector, any Agent that attempts to load your Connector will 
 be able to check that it satisfies your Connector's requirements. This property is referenced in both the Connector and 
 the provided debugging Agent's `build.gradle.kts` files. Available versions of the Seeq Link SDK can be found in the 
-Mavent repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
+Maven repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called
