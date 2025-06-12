@@ -7,3 +7,4 @@ hs_err_pid*
 # Gradle internals
 /.gradle
 build/
+/data/agent-keys/agent.keys
