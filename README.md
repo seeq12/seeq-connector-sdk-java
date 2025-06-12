@@ -64,7 +64,7 @@ Take the following steps to verify your debugging setup:
    `Java Connector SDK Debugging Agent`
 
    Click Save and record the displayed One-Time Password value for use in the next step.
-1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
+1. Modify the `src\resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
    `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
 1. Set a breakpoint on the first line of the `main()` function.
 1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
@@ -85,6 +85,13 @@ Take the following steps to verify your debugging setup:
     verifies that the template connector is able to index its signals and respond to data queries.**
 
 Now you're ready to start development!
+
+### Note: ###
+The setup process described above creates a seeq-link-sdk-debugging-agent/build/resources/main/data/agent-keys/agent.
+keys file, where the debugging agent stores its authentication keys.
+
+As long as you don’t delete this file, the debugging agent will remain authenticated, and there is no need to modify 
+src/resources/data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process.
 
 ## Developing your Connector
 
