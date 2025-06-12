@@ -91,7 +91,8 @@ The setup process described above creates a data/agent-keys/agent.keys file, whe
 authentication keys.
 
 As long as you don’t delete this file, the debugging agent will remain authenticated, and there is no need to modify 
-data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process.
+data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process. In that case, be sure 
+to check the "re-provision even if the agent is already provisioned" option when generating the new OTP.
 
 ## Developing your Connector
 
