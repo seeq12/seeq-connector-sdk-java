@@ -54,9 +54,9 @@ Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server. This URL 
-   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a specific 
-   port for the connection if the server is not using the standard 80/443 configuration for http/https. Do this by 
-   appending it to the end following a colon. E.g. `http://test.server:12345`
+   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a
+   custom port for the connection if the server is not using the standard ports (80 for HTTP or 443 for HTTPS). To
+   do this, append the port number to the end of the URL, following a colon — e.g., http://test.server:12345.
 1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
 1. Click the +Add Agent button and, in the prompt, provide the hostname of the machine where the development agent will 
    run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter 
