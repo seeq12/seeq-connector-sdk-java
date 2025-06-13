@@ -65,7 +65,8 @@ Take the following steps to verify your debugging setup:
 
    Click Save and record the displayed One-Time Password value for use in the next step.
 1. Modify the `data/keys/agent.otp` file in the `seeq-connector-sdk` root project, replacing 
-   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
+   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. **Note:** The
+   `agent.otp` file will reset after the agent reads the entered value.
 1. Set a breakpoint on the first line of the `main()` function.
 1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
    *seeq-connector-sdk > seeq-link-sdk-debugging-agent > Tasks > application > run* and select *Debug*.
