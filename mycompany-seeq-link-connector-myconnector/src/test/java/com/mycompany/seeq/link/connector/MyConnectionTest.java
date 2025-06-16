@@ -19,7 +19,6 @@ public class MyConnectionTest {
 
         config.setEnabled(true);
         config.setSamplePeriod("1s");
-        config.setTagCount(100);
 
         DatasourceConnectionServiceV2 connectionServiceMock = mock(DatasourceConnectionServiceV2.class);
         when(connectionServiceMock.log()).thenReturn(mock(Logger.class));

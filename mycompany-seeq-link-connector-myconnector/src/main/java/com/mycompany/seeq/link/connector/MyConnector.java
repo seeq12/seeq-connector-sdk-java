@@ -46,8 +46,6 @@ public class MyConnector implements ConnectorV2 {
             connectionConfig.setEnabled(true);
 
             // These configuration variables are specific to the MyConnector example. You'll likely remove them.
-            // We'll specify a large enough tag count that we observe the batching mechanism in action.
-            connectionConfig.setTagCount(5000);
             connectionConfig.setSamplePeriod("15m");
 
             // Add the new connection configuration to its parent connector
@@ -79,13 +77,6 @@ public class MyConnector implements ConnectorV2 {
                 // you can also disable the connection so it is no longer processed until changes are made
                 connectionConfig.setEnabled(false);
 
-                continue;
-            }
-
-            if (connectionConfig.getTagCount() < 0) {
-                this.connectorService.log().warn("Connection '{}' has an invalid TagCount. It will be ignored.",
-                        connectionConfig.getName());
-                connectionConfig.setEnabled(false);
                 continue;
             }
 

@@ -54,9 +54,9 @@ Take the following steps to verify your debugging setup:
 
 1. Open the `src/main/java/com/seeq/link/sdk/debugging/Main.java` file in the `seeq-link-sdk-debugging-agent` project.
 1. Modify the URL on the line `String seeqUrl = "https://yourserver.seeq.host";` to match your Seeq server. This URL 
-   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a specific 
-   port for the connection if the server is not using the standard 80/443 configuration for http/https. Do this by 
-   appending it to the end following a colon. E.g. `http://test.server:12345`
+   may specify either "http" or "https" as appropriate for your server's configuration. You may also specify a
+   custom port for the connection if the server is not using the standard ports (80 for HTTP or 443 for HTTPS). To
+   do this, append the port number to the end of the URL, following a colon — e.g., http://test.server:12345.
 1. On your Seeq server as a user with administrator permissions, open the Administration page and select the Agents tab. 
 1. Click the +Add Agent button and, in the prompt, provide the hostname of the machine where the development agent will 
    run in the Machine Name field. Expand the Advanced options and, in the Agent Name field, enter 
@@ -64,8 +64,9 @@ Take the following steps to verify your debugging setup:
    `Java Connector SDK Debugging Agent`
 
    Click Save and record the displayed One-Time Password value for use in the next step.
-1. Modify the `resources\data\keys\agent.otp` file in the `seeq-link-sdk-debugging-agent` project, replacing 
-   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. 
+1. Modify the `data/keys/agent.otp` file in the `seeq-connector-sdk` root project, replacing 
+   `<your_agent_one_time_password>` with the One-Time Password recorded in the previous step. **Note:** The
+   `agent.otp` file will reset after the agent reads the entered value.
 1. Set a breakpoint on the first line of the `main()` function.
 1. From IntelliJ's menu bar, select *View > Tool Windows > Gradle* to open the Gradle tool window, then right-click on
    *seeq-connector-sdk > seeq-link-sdk-debugging-agent > Tasks > application > run* and select *Debug*.
@@ -78,13 +79,21 @@ Take the following steps to verify your debugging setup:
    that the debugging agent can load the template connector correctly.**
 1. Resume execution.
 1. Bring up Seeq Workbench and click on the connections section at the top of the screen. You should
-   see `My Connector Type: My First Connection` in the list of connections, with 5000 items indexed.
+   see `My Connector Type: My First Connection` in the list of connections, with a few items indexed.
 1. In Seeq Workbench's *Data* tab, search for `simulated`.
 1. A list of simulated signals should appear in the results. Click on any of the results.
 1. The signal should be added to the *Details* pane and a repeating waveform should be shown in the trend. **This
     verifies that the template connector is able to index its signals and respond to data queries.**
 
 Now you're ready to start development!
+
+### Note: ###
+The setup process described above creates a data/agent-keys/agent.keys file, where the debugging agent stores its 
+authentication keys.
+
+As long as you don’t delete this file, the debugging agent will remain authenticated, and there is no need to modify 
+data/keys/agent.otp again. If the file is deleted, you will need to repeat the setup process. In that case, be sure 
+to check the "re-provision even if the agent is already provisioned" option when generating the new OTP.
 
 ## Developing your Connector
 
@@ -109,7 +118,7 @@ exactly match the version number of the Seeq Link SDK they provide. By specifyin
 Link SDK that provides the necessary features for your Connector, any Agent that attempts to load your Connector will 
 be able to check that it satisfies your Connector's requirements. This property is referenced in both the Connector and 
 the provided debugging Agent's `build.gradle.kts` files. Available versions of the Seeq Link SDK can be found in the 
-Mavent repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
+Maven repository at https://repo1.maven.org/maven2/com/seeq/link/seeq-link-sdk/. 
 
 Once you are ready to start developing, just open the `MyConnector.java` and `MyConnection.java` files in your IDE and
 start reading through the heavily-annotated source code. The template connector uses a small class called

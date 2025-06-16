@@ -20,5 +20,14 @@
   "SeeqServerReadTimeoutForIndexing" : null,
   "SeeqServerNetworkTimeoutForIndexing" : null,
   "ExportMaxConcurrencyLevel" : null,
-  "HighMemoryUseThresholdGB" : null
+  "HighMemoryUseThresholdGB" : null,
+  "MinConnectorReinitializationDelay" : "5s",
+  "MaxConnectorReinitializationDelay" : "10 min",
+  "WebSocketKeepAliveInterval" : null,
+  "WebSocketKeepAliveTimeout" : null,
+  "DefaultInitialSizeForBatchOperations" : null,
+  "DefaultMaximumSizeForBatchOperations" : null,
+  "DefaultMaximumDurationForBatchOperations" : null,
+  "AgentKeyRotationDays" : null,
+  "ApiRequestErrorsRequiringRetryOverride" : [ ]
 }

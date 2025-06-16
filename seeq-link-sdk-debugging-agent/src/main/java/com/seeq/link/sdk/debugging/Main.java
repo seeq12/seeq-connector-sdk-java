@@ -1,5 +1,8 @@
 package com.seeq.link.sdk.debugging;
 
+import static com.seeq.link.sdk.debugging.ProjectPathsHelper.getConnectorSdkRoot;
+import static com.seeq.link.sdk.debugging.ProjectPathsHelper.getSeeqDataFolder;
+
 import com.seeq.link.agent.Program;
 import com.seeq.link.sdk.ClassFactory;
 
@@ -43,28 +46,12 @@ public class Main {
         }
         config.setDataFolder(seeqDataFolder);
 
+        Path connectorSdkRoot = getConnectorSdkRoot();
         // Set the connectorSearchPaths to only find connectors within the connector-sdk folder
-        Path executingAssemblyLocation;
-        try {
-            // Grab the full path of the Agent JAR that is currently executing
-            executingAssemblyLocation = Paths.get(Main.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI());
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException("Could not determine executing assembly location", e);
-        }
-
-        Path connectorSdkRoot = executingAssemblyLocation.getParent().getParent().getParent().getParent().getParent();
         String searchPath = connectorSdkRoot.toString() + "/*connector*/build/install/*connector*/*connector*.jar";
 
         config.setConnectorSearchPaths(searchPath);
 
         new Program().run(new com.seeq.link.agent.ClassFactory(), new ClassFactory(), config);
-    }
-
-    private static Path getSeeqDataFolder() {
-        URL resource = Main.class.getClassLoader().getResource("data/");
-        assert resource != null;
-        File file = new File(resource.getPath());
-        return Path.of(file.getAbsolutePath());
     }
 }

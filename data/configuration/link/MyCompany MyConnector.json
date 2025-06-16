@@ -12,7 +12,6 @@
     "Transforms" : null,
     "MaxConcurrentRequests" : null,
     "MaxResultsPerRequest" : null,
-    "TagCount" : 5000,
     "SamplePeriod" : "15m"
   } ]
 }
