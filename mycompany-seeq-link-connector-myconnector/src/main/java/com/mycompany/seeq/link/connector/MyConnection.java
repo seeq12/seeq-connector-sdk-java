@@ -20,6 +20,7 @@ import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
 import com.seeq.model.AssetInputV1;
 import com.seeq.model.AssetTreeSingleInputV1;
+import com.seeq.model.CapsulePropertyInputV1;
 import com.seeq.model.ConditionUpdateInputV1;
 import com.seeq.model.ScalarInputV1;
 import com.seeq.model.ScalarPropertyV1;
@@ -246,8 +247,20 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
                     TimeInstant start = new TimeInstant(event.getStart());
                     TimeInstant end = new TimeInstant(event.getEnd());
 
+                    // Usually there is a unique id of the event in your historian.
+                    // In this example, we use the start time of the event as the id.
+                    long uniqueId = event.getStart().toInstant().toEpochMilli();
+
+                    // Create a list of capsule properties to be displayed in the details pane for capsules in
+                    // Seeq Workbench.
+                    // Note: These properties must also be specified during indexing for the condition;
+                    // otherwise, they will not appear.
                     List<Capsule.Property> capsuleProperties = new ArrayList<>();
-                    capsuleProperties.add(new Capsule.Property("Value", event.getIntensity().toString(), "rads"));
+                    capsuleProperties.add(new Capsule.Property("Value",
+                            event.getIntensity().toString(), "rads"));
+                    capsuleProperties.add(new Capsule.Property("Alarm ID",
+                            Long.toString(uniqueId), "string"));
+                    capsuleProperties.add(new Capsule.Property("Batch ID", "batch 1", "string"));
 
                     return new Capsule(start, end, capsuleProperties);
                 })
@@ -378,6 +391,29 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // 2m etc.) that indicates the maximum duration of capsules in this series and is required for stored
         // conditions like this example.
         condition.setMaximumDuration("2h");
+
+        // The set of capsule properties for this condition.
+        condition.setCapsuleProperties(List.of(
+                new CapsulePropertyInputV1().name("Value").unitOfMeasure("rads"),
+                new CapsulePropertyInputV1().name("Batch ID").unitOfMeasure("string"),
+                new CapsulePropertyInputV1().name("Alarm ID").unitOfMeasure("string")
+        ));
+
+        // We always replace Capsule properties to reflect changes in the source system.
+        condition.replaceCapsuleProperties(true);
+
+        // CapsuleIdProperty should be set to the name of a capsule property that uniquely identifies each capsule
+        // (e.g., Alarm Id, Batch Id, Unique Id, etc.). If specified, this value must exactly match the name of an
+        // existing capsule property that contains a stable identifier of the capsule. This allows Seeq to recognize
+        // capsules as the same logical event even if their start/end times or other properties change over time.
+        // "start" can also be used as a special value to indicate that the capsule's start time should be used as the
+        // unique identifier of the capsule.
+        //
+        // Why Use Stable Capsule Identifiers?
+        // By default, any change to a capsule—such as its start time, end time, or properties—will cause it to be
+        // treated as a distinct capsule, even if it represents the same logical event, such as an alarm or batch.
+        // This behavior can disrupt user workflows that rely on stable capsule references.
+        condition.setCapsuleIdProperty("Alarm ID");
 
         // PutCondition() queues items up for performance reasons and writes them in batch to the server.
         //
