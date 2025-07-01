@@ -97,7 +97,7 @@ public class DatasourceSimulator {
                 )
                 .mapToObj(index -> {
                     ZonedDateTime start = new TimeInstant(index * capsulePeriodInNanos).toDateTime();
-                    ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10L);
+                    ZonedDateTime end = ChronoUnit.MILLIS.addTo(start, 10000L);
                     return new Alarm.Event(start, end, RNG.nextDouble());
                 })
                 .limit(limit);

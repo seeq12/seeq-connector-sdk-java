@@ -254,12 +254,10 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
                     // Create a list of capsule properties to be displayed in the details pane for capsules in
                     // Seeq Workbench.
                     // Note: These properties must also be specified during indexing for the condition;
-                    // otherwise, they will not appear.
+                    // otherwise, they will not be available for use in Seeq.
                     List<Capsule.Property> capsuleProperties = new ArrayList<>();
-                    capsuleProperties.add(new Capsule.Property("Value",
-                            event.getIntensity().toString(), "rads"));
-                    capsuleProperties.add(new Capsule.Property("Alarm ID",
-                            Long.toString(uniqueId), "string"));
+                    capsuleProperties.add(new Capsule.Property("Intensity", event.getIntensity().toString(), "rads"));
+                    capsuleProperties.add(new Capsule.Property("Alarm ID", Long.toString(uniqueId), "string"));
                     capsuleProperties.add(new Capsule.Property("Batch ID", "batch 1", "string"));
 
                     return new Capsule(start, end, capsuleProperties);
@@ -392,12 +390,28 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // conditions like this example.
         condition.setMaximumDuration("2h");
 
-        // The set of capsule properties for this condition.
-        condition.setCapsuleProperties(List.of(
-                new CapsulePropertyInputV1().name("Value").unitOfMeasure("rads"),
-                new CapsulePropertyInputV1().name("Batch ID").unitOfMeasure("string"),
-                new CapsulePropertyInputV1().name("Alarm ID").unitOfMeasure("string")
-        ));
+        // In order to ensure that we have the correct metadata for the capsule properties. This is a list of
+        // all possible properties for each condition.
+        List<CapsulePropertyInputV1> capsuleProperties = new ArrayList<>();
+
+        // We define each capsule property with a Name and a Unit of Measure
+        CapsulePropertyInputV1 capsuleProperty = new CapsulePropertyInputV1();
+
+        // The name is what defines the name of the capsule property. It is what is shown as the column header within
+        // the Capsules pane of Workbench.
+        capsuleProperty.setName("Intensity");
+
+        // The unit of measure is a supported Seeq unit
+        // https://support.seeq.com/kb/latest/cloud/supported-units#SupportedUnits-SupportedPrefixes
+        // If the value is a string, this value should be set to "string"
+        capsuleProperty.setUnitOfMeasure("rads");
+        capsuleProperties.add(capsuleProperty);
+
+        capsuleProperties.add(new CapsulePropertyInputV1().name("Batch ID").unitOfMeasure("string"));
+        capsuleProperties.add(new CapsulePropertyInputV1().name("Alarm ID").unitOfMeasure("string"));
+
+        // The list of properties are assigned to the condition
+        condition.setCapsuleProperties(capsuleProperties);
 
         // We always replace Capsule properties to reflect changes in the source system.
         condition.replaceCapsuleProperties(true);
@@ -408,11 +422,6 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
         // capsules as the same logical event even if their start/end times or other properties change over time.
         // "start" can also be used as a special value to indicate that the capsule's start time should be used as the
         // unique identifier of the capsule.
-        //
-        // Why Use Stable Capsule Identifiers?
-        // By default, any change to a capsule—such as its start time, end time, or properties—will cause it to be
-        // treated as a distinct capsule, even if it represents the same logical event, such as an alarm or batch.
-        // This behavior can disrupt user workflows that rely on stable capsule references.
         condition.setCapsuleIdProperty("Alarm ID");
 
         // PutCondition() queues items up for performance reasons and writes them in batch to the server.
