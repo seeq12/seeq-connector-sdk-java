@@ -25,13 +25,16 @@ public class MyConnector implements ConnectorV2 {
     public void initialize(ConnectorServiceV2 connectorService) throws Exception {
         this.connectorService = connectorService;
 
+        // Set your developer name so that end users can see who to contact with questions. This will appear in the
+        // datasource administration tab.
+        this.connectorService.setConnectorDeveloperName("My Awesome Company");
         // First, load your configuration using the connector service. If the configuration file is not found, the first
         // object in the passed-in array is returned.
         ConfigObject configObj = this.connectorService.loadConfig(new ConfigObject[] { new MyConnectorConfigV1() });
         this.connectorConfig = (MyConnectorConfigV1) configObj;
 
         // Check to see if there are any connections configured yet
-        if (this.connectorConfig.getConnections().size() == 0) {
+        if (this.connectorConfig.getConnections().isEmpty()) {
             // Create a default connection configuration
             MyConnectionConfigV1 connectionConfig = new MyConnectionConfigV1();
 
