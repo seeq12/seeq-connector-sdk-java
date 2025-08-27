@@ -15,6 +15,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testImplementation("org.assertj:assertj-core:3.19.0")
     testImplementation(testFixtures("com.seeq.link:seeq-link-sdk:${project.properties["seeqLinkSDKVersion"]}"))
+    implementation("com.google.guava:guava:33.4.8-jre") {
+        because("Needed by DatasourceSimulator")
+    }
 }
 
 tasks {
