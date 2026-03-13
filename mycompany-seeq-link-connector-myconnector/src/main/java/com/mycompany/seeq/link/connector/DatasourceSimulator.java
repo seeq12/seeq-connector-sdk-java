@@ -4,7 +4,11 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -23,10 +27,56 @@ public class DatasourceSimulator {
     private boolean connected;
     private Duration samplePeriod;
     private Duration signalPeriod;
+    private ZonedDateTime serverTime;
 
     public DatasourceSimulator(Duration samplePeriod, Duration signalPeriod) {
         this.samplePeriod = samplePeriod;
         this.signalPeriod = signalPeriod;
+    }
+
+    public void setServerTime(ZonedDateTime serverTime) {
+        this.serverTime = serverTime;
+    }
+
+    public ZonedDateTime getServerTime() {
+        return this.serverTime != null ? this.serverTime : ZonedDateTime.now();
+    }
+
+    /**
+     * Returns which databases have changes since the given time. Used for incremental indexing.
+     * When since is null, all databases are considered changed (full sync). When since is non-null,
+     * a deterministic subset is returned so that incremental sync has work to do (e.g. database "1").
+     */
+    public Set<String> getChangedDatabaseIdsSince(Set<String> allDatabaseIds, ZonedDateTime since) {
+        if (since == null) {
+            return new HashSet<>(allDatabaseIds);
+        }
+        Set<String> changed = new HashSet<>();
+        if (allDatabaseIds.contains("1")) {
+            changed.add("1");
+        }
+        return changed;
+    }
+
+    public Iterable<Tag> getChangedTagsSince(String databaseId, ZonedDateTime since) {
+        if (since == null || "1".equals(databaseId)) {
+            return getTagsForDatabase(databaseId);
+        }
+        return Collections.emptyList();
+    }
+
+    public Iterable<Alarm> getChangedAlarmsSince(String databaseId, ZonedDateTime since) {
+        if (since == null || "1".equals(databaseId)) {
+            return getAlarmsForDatabase(databaseId);
+        }
+        return Collections.emptyList();
+    }
+
+    public Iterable<Constant> getChangedConstantsSince(String databaseId, ZonedDateTime since) {
+        if (since == null || "1".equals(databaseId)) {
+            return getConstantsForDatabase(databaseId);
+        }
+        return Collections.emptyList();
     }
 
     public boolean isConnected() {

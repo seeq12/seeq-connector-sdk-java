@@ -1,16 +1,24 @@
 package com.mycompany.seeq.link.connector;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
 import com.seeq.link.sdk.interfaces.DatasourceConnectionServiceV2;
 import com.seeq.link.sdk.interfaces.GetSamplesParameters;
+import com.seeq.link.sdk.interfaces.SyncMode;
 import com.seeq.link.sdk.utilities.Sample;
 import com.seeq.link.sdk.utilities.TimeInstant;
+import com.seeq.model.ScalarPropertyV1;
 
 public class MyConnectionTest {
     @Test
@@ -42,6 +50,43 @@ public class MyConnectionTest {
                 .containsExactly(
                         new Sample().key(new TimeInstant(1_000_000_000L)).value(0.06279051952931337),
                         new Sample().key(new TimeInstant(2_000_000_000L)).value(0.12533323356430426));
+    }
+
+    @Test
+    public void indexIncrementalStoresDataVersionCheck() {
+        MyConnectionConfigV1 config = new MyConnectionConfigV1();
+        config.setEnabled(true);
+        config.setSamplePeriod("1s");
+
+        DatasourceConnectionServiceV2 connectionServiceMock = mock(DatasourceConnectionServiceV2.class);
+        when(connectionServiceMock.log()).thenReturn(mock(Logger.class));
+
+        DatasourceStub datasourceStub = new DatasourceStub();
+        ScalarPropertyV1 versionCheck = new ScalarPropertyV1();
+        versionCheck.setName("Data Version Check");
+        versionCheck.setValue("1|2020-01-01T00:00:00Z!1");
+        datasourceStub.getAdditionalProperties().add(versionCheck);
+
+        when(connectionServiceMock.getDatasource()).thenReturn(datasourceStub);
+
+        MyConnection connection = new MyConnection(null, config);
+        connection.initialize(connectionServiceMock);
+        connection.connect();
+
+        connection.index(SyncMode.Incremental);
+
+        ArgumentCaptor<List> propertiesCaptor = ArgumentCaptor.forClass(List.class);
+        verify(connectionServiceMock).storeDatasourceProperties(eq(false), propertiesCaptor.capture());
+        @SuppressWarnings("unchecked")
+        List<ScalarPropertyV1> stored = propertiesCaptor.getValue();
+        assertThat(stored).isNotEmpty();
+        ScalarPropertyV1 newVersionCheck = stored.stream()
+                .filter(p -> "Data Version Check".equals(p.getName()))
+                .findFirst()
+                .orElse(null);
+        assertThat(newVersionCheck).isNotNull();
+        assertThat(newVersionCheck.getValue()).contains("!1");
+        assertThat(newVersionCheck.getValue()).contains("|");
     }
 
 }

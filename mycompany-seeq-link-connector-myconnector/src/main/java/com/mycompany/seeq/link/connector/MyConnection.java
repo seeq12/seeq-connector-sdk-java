@@ -3,7 +3,11 @@ package com.mycompany.seeq.link.connector;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.seeq.link.sdk.DefaultIndexingDatasourceConnectionConfig;
@@ -43,6 +47,13 @@ import com.seeq.model.SignalWithIdInputV1;
  * {@link com.seeq.link.sdk.interfaces.AgentService} on {@link DatasourceConnectionServiceV2}.
  */
 public class MyConnection implements SignalPullDatasourceConnection, ConditionPullDatasourceConnection {
+
+    private static final String DATA_VERSION_CHECK_PROPERTY = "Data Version Check";
+    /**
+     * Bump this to force a full sync on upgrade when the indexing schema changes.
+     */
+    private static final int SYNC_SCHEMA_VERSION = 1;
+
     private final MyConnector connector;
     private final MyConnectionConfigV1 connectionConfig;
     private DatasourceConnectionServiceV2 connectionService;
@@ -163,21 +174,169 @@ public class MyConnection implements SignalPullDatasourceConnection, ConditionPu
 
     @Override
     public void index(SyncMode syncMode) {
-        // An asset tree is exactly what it sounds like; a tree that describes your asset hierarchies and the
-        // relationships
-        // between them. This means there needs to be a starting point; a root. This example shows how to create the
-        // root
-        // asset in the Seeq database.
+        this.datasourceSimulator.setServerTime(ZonedDateTime.now());
+        ZonedDateTime serverTimeBeforeQuery = this.datasourceSimulator.getServerTime();
+
+        String encodedVersionCheck = getStoredDataVersionCheck();
+        Map<String, ZonedDateTime> previousSyncStartTimes = new LinkedHashMap<>();
+        int[] schemaVersionHolder = new int[1];
+        decodeDatasourceVersionCheck(encodedVersionCheck, previousSyncStartTimes, schemaVersionHolder);
+        int previousSyncSchemaVersion = schemaVersionHolder[0];
+
+        if (syncMode == SyncMode.Full) {
+            previousSyncStartTimes.clear();
+        }
+
+        List<DatasourceSimulator.Element> databases = new ArrayList<>();
+        this.datasourceSimulator.getDatabases().forEach(databases::add);
+
+        Set<String> allDatabaseIds = new java.util.HashSet<>();
+        for (DatasourceSimulator.Element db : databases) {
+            allDatabaseIds.add(db.getId());
+        }
+
+        Set<String> changedDatabaseIds = null;
+        if (syncMode == SyncMode.Incremental && !previousSyncStartTimes.isEmpty()) {
+            changedDatabaseIds = new HashSet<>();
+            for (String dbId : allDatabaseIds) {
+                ZonedDateTime since = previousSyncStartTimes.get(dbId);
+                if (since != null && !this.datasourceSimulator.getChangedDatabaseIdsSince(Set.of(dbId), since).isEmpty()) {
+                    changedDatabaseIds.add(dbId);
+                }
+            }
+        }
+
         String rootAssetId = this.syncRootAsset();
+        Map<String, ZonedDateTime> newSyncStartTimes = new LinkedHashMap<>(previousSyncStartTimes);
+        int maxChangedPerDatabase = this.connectionConfig.getIncrementalIndexingMaxChangedPerDatabase();
 
-        // Do whatever is necessary to generate the list of signals you want to show up in Seeq. It is generally
-        // preferable to use a "streaming" method of iterating through the tags. I.e., try not to hold them all in
-        // memory because it is harder to scale to indexing hundreds of thousands of signals. Although these examples
-        // use Iterators (which can also be composed in a 'lazy' manner), you may want to consider using Java 8's
-        // Streams, which are often friendlier and more convenient to use.
+        for (DatasourceSimulator.Element database : databases) {
+            String databaseId = database.getId();
+            ZonedDateTime previousSyncStartTime = syncMode == SyncMode.Full ? null : previousSyncStartTimes.get(databaseId);
+            if (syncMode == SyncMode.Incremental && changedDatabaseIds != null && previousSyncStartTime != null
+                    && !changedDatabaseIds.contains(databaseId)) {
+                continue;
+            }
+            boolean doFullSync = previousSyncStartTime == null
+                    || previousSyncSchemaVersion != SYNC_SCHEMA_VERSION;
 
-        // Loop through all the tags in our simulated datasource and tell Seeq Server about them
-        this.syncAssets(rootAssetId);
+            if (!doFullSync) {
+                int changedCount = countChangedItems(databaseId, previousSyncStartTime);
+                if (changedCount >= maxChangedPerDatabase) {
+                    this.connectionService.log().info(
+                            "Incremental indexing limit ({}) reached for database {}, skipping until next full index",
+                            maxChangedPerDatabase, databaseId);
+                    continue;
+                }
+            }
+
+            if (doFullSync) {
+                this.syncDatabase(database);
+                this.linkToParentAsset(rootAssetId, database.getId());
+                syncAllItemsForDatabase(database);
+            } else {
+                this.syncDatabase(database);
+                this.linkToParentAsset(rootAssetId, database.getId());
+                syncChangedItemsForDatabase(database, previousSyncStartTime);
+            }
+            newSyncStartTimes.put(databaseId, serverTimeBeforeQuery);
+        }
+
+        String newEncoded = encodeDatasourceVersionCheck(newSyncStartTimes);
+        List<ScalarPropertyV1> properties = new ArrayList<>();
+        ScalarPropertyV1 versionCheckProperty = new ScalarPropertyV1();
+        versionCheckProperty.setName(DATA_VERSION_CHECK_PROPERTY);
+        versionCheckProperty.setValue(newEncoded);
+        versionCheckProperty.setUnitOfMeasure("string");
+        properties.add(versionCheckProperty);
+        this.connectionService.storeDatasourceProperties(false, properties);
+    }
+
+    private String getStoredDataVersionCheck() {
+        if (this.connectionService.getDatasource() == null
+                || this.connectionService.getDatasource().getAdditionalProperties() == null) {
+            return null;
+        }
+        return this.connectionService.getDatasource().getAdditionalProperties().stream()
+                .filter(p -> DATA_VERSION_CHECK_PROPERTY.equals(p.getName()))
+                .findFirst()
+                .map(p -> p.getValue() != null ? p.getValue().toString() : null)
+                .orElse(null);
+    }
+
+    private static void decodeDatasourceVersionCheck(String encoded, Map<String, ZonedDateTime> previousSyncStartTimes, int[] outSchemaVersion) {
+        if (encoded == null || encoded.trim().isEmpty()) {
+            return;
+        }
+        String[] parts = encoded.split("!");
+        String syncTimesPart = parts[0];
+        if (parts.length >= 2) {
+            try {
+                outSchemaVersion[0] = Integer.parseInt(parts[1].trim());
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        for (String item : syncTimesPart.split(";")) {
+            String[] pair = item.split("\\|", 2);
+            if (pair.length == 2) {
+                try {
+                    previousSyncStartTimes.put(pair[0].trim(), ZonedDateTime.parse(pair[1].trim()));
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    private static String encodeDatasourceVersionCheck(Map<String, ZonedDateTime> databaseSyncTimes) {
+        List<String> segments = new ArrayList<>();
+        for (Map.Entry<String, ZonedDateTime> e : databaseSyncTimes.entrySet()) {
+            segments.add(e.getKey() + "|" + e.getValue().toString());
+        }
+        return String.join(";", segments) + "!" + SYNC_SCHEMA_VERSION;
+    }
+
+    private int countChangedItems(String databaseId, ZonedDateTime since) {
+        int count = 0;
+        for (DatasourceSimulator.Tag t : this.datasourceSimulator.getChangedTagsSince(databaseId, since)) {
+            count++;
+        }
+        for (DatasourceSimulator.Alarm a : this.datasourceSimulator.getChangedAlarmsSince(databaseId, since)) {
+            count++;
+        }
+        for (DatasourceSimulator.Constant c : this.datasourceSimulator.getChangedConstantsSince(databaseId, since)) {
+            count++;
+        }
+        return count;
+    }
+
+    private void syncAllItemsForDatabase(DatasourceSimulator.Element database) {
+        for (DatasourceSimulator.Tag tag : this.datasourceSimulator.getTagsForDatabase(database.getId())) {
+            this.syncSignal(tag);
+            this.linkToParentAsset(database.getId(), tag.getId());
+        }
+        for (DatasourceSimulator.Alarm alarm : this.datasourceSimulator.getAlarmsForDatabase(database.getId())) {
+            this.syncCondition(alarm);
+            this.linkToParentAsset(database.getId(), alarm.getId());
+        }
+        for (DatasourceSimulator.Constant constant : this.datasourceSimulator.getConstantsForDatabase(database.getId())) {
+            this.syncScalar(constant);
+            this.linkToParentAsset(database.getId(), constant.getId());
+        }
+    }
+
+    private void syncChangedItemsForDatabase(DatasourceSimulator.Element database, ZonedDateTime since) {
+        for (DatasourceSimulator.Tag tag : this.datasourceSimulator.getChangedTagsSince(database.getId(), since)) {
+            this.syncSignal(tag);
+            this.linkToParentAsset(database.getId(), tag.getId());
+        }
+        for (DatasourceSimulator.Alarm alarm : this.datasourceSimulator.getChangedAlarmsSince(database.getId(), since)) {
+            this.syncCondition(alarm);
+            this.linkToParentAsset(database.getId(), alarm.getId());
+        }
+        for (DatasourceSimulator.Constant constant : this.datasourceSimulator.getChangedConstantsSince(database.getId(), since)) {
+            this.syncScalar(constant);
+            this.linkToParentAsset(database.getId(), constant.getId());
+        }
     }
 
     @Override
